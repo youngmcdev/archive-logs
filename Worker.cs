@@ -14,6 +14,8 @@ public class Worker : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         Console.WriteLine("Hello world!");
+        _logger.LogInformation("ExecuteAsync!");
+        
         _host.StopAsync();
     }
 }

@@ -1,10 +1,10 @@
 ﻿using System.CommandLine;
 
-namespace mcy.CommandLine;
+namespace mcy.Tools;
 
-class Program
+class McyProg
 {
-    static async Task<int> Main(string[] args)
+    public static async Task<int> McyProg_Main(string[] args)
     {
         var fileOption = new Option<FileInfo?>(
             name: "--file",
