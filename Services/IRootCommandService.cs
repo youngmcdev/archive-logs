@@ -1,6 +1,6 @@
 using System.CommandLine;
 
-namespace mcy.Tools;
+namespace mcy.Tools.Services;
 
 public interface IRootCommandService
 {
