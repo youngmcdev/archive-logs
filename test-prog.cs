@@ -135,3 +135,5 @@ class McyProg
         writer.Flush();
     }
 }
+
+//https://anthonysimmon.com/true-dependency-injection-with-system-commandline/

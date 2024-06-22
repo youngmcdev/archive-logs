@@ -2,12 +2,7 @@ using System.CommandLine;
 
 namespace mcy.Tools;
 
-public interface ICommandLineService
-{
-    RootCommand BuildRootCommand();
-}
-
-public class CommandLineService: ICommandLineService
+public class ArchiveRootCommandService: IRootCommandService
 {
     public RootCommand BuildRootCommand()
     {
@@ -25,10 +20,10 @@ public class CommandLineService: ICommandLineService
             { 
                 IsRequired = true, 
                 // Allows --search-terms Presto Hemispheres "A Farwell to Kings" Signals "Grace Under Pressure"
-                AllowMultipleArgumentsPerToken = true 
+                AllowMultipleArgumentsPerToken = true
             };
 
-        var logFileTypeOption = new Option<LogFileTypes>(
+        var logFileTypeOption = new Option<ArchiveLogFileTypes>(
             name: "--log-file-type", 
             description: "The type of log file that will be looked for in the directories specified. Other file will be ignored. A file type uses a regular expression to compare to file names and expects the date to be in the file name at a specific, relative location in the file name."){
                 IsRequired = true
@@ -38,8 +33,8 @@ public class CommandLineService: ICommandLineService
             name: "--path-to-7zip", 
             description: "Path to the 7-zip program. Overrides the value in appSettings.json.");
 
-        var rootCommand new RootCommand("A program for creating archives.");
-        var archiveCommand = new Command("archive", "Archive log files and delete the original files.")
+        
+        var archiveCommand = new Command("archive", "Archive log files and optionally delete the original files.")
         {
             dryRunOption,
             deleteFilesOption,
@@ -47,12 +42,11 @@ public class CommandLineService: ICommandLineService
             logFileTypeOption,
             pathTo7zipOption
         };
-        rootCommand.AddCommand(archiveCommand);
-        return rootCommand;
+        return new RootCommand("A program for creating archives."){archiveCommand};
     }
 }
 
-public enum LogFileTypes
+public enum ArchiveLogFileTypes
 {
     None = 0,
     IIS,

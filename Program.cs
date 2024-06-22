@@ -6,7 +6,8 @@ public class Program
     {
         var builder = Host.CreateApplicationBuilder(args);
         builder.Services.AddHostedService<Worker>()
-            .AddScoped<ICommandLineService, CommandLineService>();
+            .AddScoped<IRootCommandService, ArchiveRootCommandService>()
+            .AddScoped<ICommandExecutor, CommandExecutor>();
 
         var host = builder.Build();
         host.Run();
