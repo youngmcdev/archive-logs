@@ -4,25 +4,20 @@ namespace mcy.Tools;
 
 public interface ICommandExecutor
 {
-    int Run();
+    int Run(string[] commandLineArguments);
 }
 
 public class CommandExecutor: ICommandExecutor
 {
-    private readonly string[] _commandlineArguments;
-    
-    public CommandExecutor(string[] args)
+    private readonly IRootCommandService _commandService;
+
+    public CommandExecutor(IRootCommandService commandService)
     {
-        _commandlineArguments = args;
+        _commandService = commandService;
     }
 
-    public int Run()
+    public int Run(string[] commandLineArguments)
     {
-        return Execute(new ArchiveRootCommandService());
-    }
-
-    public int Execute(IRootCommandService commandService)
-    {
-        return commandService.BuildRootCommand().Invoke(_commandlineArguments);
+        return _commandService.BuildRootCommand().Invoke(commandLineArguments);
     }
 }

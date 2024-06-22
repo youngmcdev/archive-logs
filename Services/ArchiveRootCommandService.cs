@@ -4,6 +4,13 @@ namespace mcy.Tools;
 
 public class ArchiveRootCommandService: IRootCommandService
 {
+    private readonly ILogger<ArchiveRootCommandService> _logger;
+
+    public ArchiveRootCommandService(ILogger<ArchiveRootCommandService> logger)
+    {
+        _logger = logger;
+    }
+
     public RootCommand BuildRootCommand()
     {
         var dryRunOption = new Option<bool>(
@@ -16,6 +23,25 @@ public class ArchiveRootCommandService: IRootCommandService
 
         var directoriesOption = new Option<IEnumerable<DirectoryInfo>>(
             name: "--directories",
+            isDefault:true,
+            parseArgument: result => {
+                var filteredDirectories = new List<DirectoryInfo>();
+                foreach(var t in result.Tokens)
+                {
+                    var filePath = t.Value;
+                    var exists = Directory.Exists(filePath);
+                    _logger.LogInformation("   Token:{0}; DirectoryExists:{1}", filePath, exists);
+                    if(exists)
+                    { 
+                        filteredDirectories.Add(new DirectoryInfo(filePath));
+                    }
+                    else
+                    {
+                        result.ErrorMessage = $"Directory, {filePath}, does not exist.";
+                    }
+                }
+                return filteredDirectories;
+            },
             description: "A list of directories to search for log files. An archive file will be left in each directory where log files are found.")
             { 
                 IsRequired = true, 
@@ -31,6 +57,21 @@ public class ArchiveRootCommandService: IRootCommandService
         
         var pathTo7zipOption = new Option<FileInfo>(
             name: "--path-to-7zip", 
+            isDefault: true,
+            parseArgument: result => {
+                if (result.Tokens.Count < 1)
+                {
+                    // Grab the value from appsettings.json and check that it exits.
+                    return new FileInfo("sample-quotes.txt"); // default value
+                }
+                string? filePath = result.Tokens.Single().Value;
+                if (!File.Exists(filePath))
+                {
+                    result.ErrorMessage = $"File, {filePath}, does not exist.";
+                    return null;
+                }
+                return new FileInfo(filePath);
+            },
             description: "Path to the 7-zip program. Overrides the value in appSettings.json.");
 
         
