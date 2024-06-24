@@ -1,6 +1,7 @@
 using System.CommandLine;
 using System.Text;
 using System.Text.Json;
+using mcy.Tools.Commands;
 using mcy.Tools.Infrastructure;
 using mcy.Tools.Infrastructure.Cli;
 using mcy.Tools.Models.AppSettings;
@@ -12,13 +13,16 @@ public class ArchiveRootCommandService: IRootCommandService
 {
     private readonly ArchiveOptions _config;
     private readonly ILogger<ArchiveRootCommandService> _logger;
-
+    private readonly IOptionValidationService _optionValidationService;
+    
     public ArchiveRootCommandService(
         IOptions<ArchiveOptions> config,
-        ILogger<ArchiveRootCommandService> logger)
+        ILogger<ArchiveRootCommandService> logger,
+        IOptionValidationService optionValidationService)
     {
         _config = config.Value;
         _logger = logger;
+        _optionValidationService = optionValidationService;
     }
 
     public RootCommand BuildRootCommand()
@@ -109,6 +113,7 @@ public class ArchiveRootCommandService: IRootCommandService
         archiveCommand.SetHandler(archiveCommandHandlerOptions => 
         {
             _logger.LogInformation("Archive Command Handler Options: {0}", archiveCommandHandlerOptions.ToString());
+            
         }, new ArchiveCommandHandlerOptionsBinder(dryRunOption, deleteFilesOption, directoriesFromConfigurationFile, directoriesOption, logFileTypeOption, pathTo7zipOption));
         
         return new RootCommand("A program for creating archives."){archiveCommand};
