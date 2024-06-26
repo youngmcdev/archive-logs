@@ -13,6 +13,8 @@ public class Program
         builder.Services.Configure<ArchiveOptions>(builder.Configuration.GetSection(ArchiveOptions.Archive));
         builder.Services.AddHostedService<Worker>()
             .AddScoped<IRootCommandService, ArchiveRootCommandService>()
+            .AddScoped<IRootCommandFactory, RootCommandFactory>()
+            .AddScoped<ICommandFactoryArchive, CommandFactoryArchive>()
             .AddScoped<IArchiveCommandHandler, ArchiveCommandHandler>()
             .AddScoped<IOptionValidationService, OptionValidationService>()
             .AddScoped<IExecute7zip, Execute7zip>()
