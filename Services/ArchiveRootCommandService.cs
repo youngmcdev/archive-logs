@@ -4,7 +4,9 @@ using System.Text.Json;
 using mcy.Tools.Commands;
 using mcy.Tools.Infrastructure;
 using mcy.Tools.Infrastructure.Cli;
+using mcy.Tools.Models;
 using mcy.Tools.Models.AppSettings;
+using mcy.Tools.Options;
 using Microsoft.Extensions.Options;
 
 namespace mcy.Tools.Services;
@@ -14,34 +16,57 @@ public class ArchiveRootCommandService: IRootCommandService
     private readonly ArchiveOptions _config;
     private readonly ILogger<ArchiveRootCommandService> _logger;
     private readonly IOptionValidationService _optionValidationService;
+    private readonly IOptionFactoryBool _boolOptionFactory;
+    private readonly IOptionFactoryScalar<FileInfo> _fileOptionFactory;
+    private readonly IOptionFactoryScalar<IEnumerable<DirectoryInfo>> _directoriesOptionFactory;
+    private readonly IOptionFactoryScalar<ArchiveLogFileTypes> _fileTypeOptionFactory;
+    private readonly IOptionFactoryScalar<string> _stringOptionFactory;
     
     public ArchiveRootCommandService(
         IOptions<ArchiveOptions> config,
         ILogger<ArchiveRootCommandService> logger,
-        IOptionValidationService optionValidationService)
+        IOptionValidationService optionValidationService,
+        IOptionFactoryBool boolOptionFactory,
+        IOptionFactoryScalar<FileInfo> fileOptionFactory,
+        IOptionFactoryScalar<IEnumerable<DirectoryInfo>> filesOptionFactory,
+        IOptionFactoryScalar<ArchiveLogFileTypes> fileTypeOptionFactory,
+        IOptionFactoryScalar<string> stringOptionFactory)
     {
         _config = config.Value;
         _logger = logger;
         _optionValidationService = optionValidationService;
+        _boolOptionFactory = boolOptionFactory;
+        _fileOptionFactory = fileOptionFactory;
+        _directoriesOptionFactory = filesOptionFactory;
+        _fileTypeOptionFactory = fileTypeOptionFactory;
+        _stringOptionFactory = stringOptionFactory;
     }
 
     public RootCommand BuildRootCommand()
     {
-        var dryRunOption = new Option<bool>(
-            name: "--dry-run",
-            description: "If true, the archiving will to occur. However, the directories and files will be iterated over, and logging will be written. Defaults to false.");
+        var dryRunOption = _boolOptionFactory.CreateOption(new CreateOptionRequestBool{
+            Name = "--dry-run",
+            Description = "If true, the archiving will to occur. However, the directories and files will be iterated over, and logging will be written. Defaults to false."
+        });
 
-        var deleteFilesOption = new Option<bool>(
-            name: "--delete-files",
-            description: "If true, the original, archived files will be deleted. Defaults to false.");
-        var directoriesFromConfigurationFile = new Option<bool>(
-            name: "--directories-from-config",
-            description: "If true, then --directories is ignored. Multiple sets of directories and their respective --log-file-type values may be specified in appsettings.json. This is a way to queue multiple runs of the archive command. Defaults to false."
-        );
-        var directoriesOption = new Option<IEnumerable<DirectoryInfo>>(
-            name: "--directories",
-            isDefault:true,
-            parseArgument: result => {
+        var deleteFilesOption = _boolOptionFactory.CreateOption(new CreateOptionRequestBool{
+            Name = "--delete-files",
+            Description = "If true, the original, archived files will be deleted. Defaults to false."
+        });
+        
+        var directoriesFromConfigurationFile = _boolOptionFactory.CreateOption(new CreateOptionRequestBool{
+            Name = "--directories-from-config",
+            Description = "If true, then --directories is ignored. Multiple sets of directories and their respective --log-file-type values may be specified in appsettings.json. This is a way to queue multiple runs of the archive command. Defaults to false."
+        });
+
+        var directoriesOption = _directoriesOptionFactory.CreateOption(new CreateOptionRequestScalar<IEnumerable<DirectoryInfo>>
+        {
+            Name = "--directories",
+            Description = "A list of directories to search for log files. An archive file will be left in each directory where log files are found.",
+            IsRequired = true,
+            IsDefault = true,
+            AllowMultipleArgumentsPerToken = true,
+            ParseArgumentDelegate = result => {
                 var filteredDirectories = new List<DirectoryInfo>();
                 var sb = new StringBuilder();
                 foreach(var t in result.Tokens)
@@ -61,24 +86,14 @@ public class ArchiveRootCommandService: IRootCommandService
                 }
                 _logger.LogInformation("Directories to be processed: {0}", sb.ToString());
                 return filteredDirectories;
-            },
-            description: "A list of directories to search for log files. An archive file will be left in each directory where log files are found.")
-            { 
-                IsRequired = true, 
-                // Allows --search-terms Presto Hemispheres "A Farwell to Kings" Signals "Grace Under Pressure"
-                AllowMultipleArgumentsPerToken = true
-            };
+            }
+        });
 
-        var logFileTypeOption = new Option<ArchiveLogFileTypes>(
-            name: "--log-file-type", 
-            description: "The type of log file that will be looked for in the directories specified. Other file will be ignored. A file type uses a regular expression to compare to file names and expects the date to be in the file name at a specific, relative location in the file name."){
-                IsRequired = true
-            };
-        
-        var pathTo7zipOption = new Option<FileInfo>(
-            name: "--path-to-7zip", 
-            isDefault: true,
-            parseArgument: result => {
+        var pathTo7zipOption = _fileOptionFactory.CreateOption(new CreateOptionRequestScalar<FileInfo>{
+            Name = "--path-to-zip",
+            Description = "Path to the 7-zip program. Overrides the value in appSettings.json.",
+            IsDefault = true,
+            ParseArgumentDelegate = result => {
                 var filePath = String.Empty;
                 if (result.Tokens.Count < 1)
                 {
@@ -96,9 +111,14 @@ public class ArchiveRootCommandService: IRootCommandService
                 }
                 _logger.LogInformation("7zip location: {0}", filePath);
                 return new FileInfo(filePath);
-            },
-            description: "Path to the 7-zip program. Overrides the value in appSettings.json.");
+            }
+        });
 
+        var logFileTypeOption = _fileTypeOptionFactory.CreateOption(new CreateOptionRequestScalar<ArchiveLogFileTypes>{
+            Name = "--log-file-type", 
+            Description = "The type of log file that will be looked for in the directories specified. Other file will be ignored. A file type uses a regular expression to compare to file names and expects the date to be in the file name at a specific, relative location in the file name.",
+            IsRequired = true
+        });
         
         var archiveCommand = new Command("archive", "Archive log files and optionally delete the original files.")
         {

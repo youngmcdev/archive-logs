@@ -15,14 +15,12 @@ public class Execute7zip: IExecute7zip
     public string[] Files{get;protected set;}
     public void SetFiles(string[] files) => Files = files;
     private readonly ArchiveOptions _config;
-    private readonly  
     
     public Execute7zip(Execute7zipRequest request)
     {
-        _config = config;
+        
     }
 
-    
     public void Execute()
     {
         using var process = new Process
