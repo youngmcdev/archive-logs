@@ -1,9 +1,9 @@
 namespace mcy.Tools.Models;
 
 
-public class CreateOptionRequestBool: BaseCreateOptionRequest{}
+public class CreateBoolCliOptionRequest: BaseCreateCliOptionRequest{}
 
-public class BaseCreateOptionRequest
+public class BaseCreateCliOptionRequest
 {
     public string Name {get;set;} = String.Empty;
     public string Description {get;set;} = String.Empty;

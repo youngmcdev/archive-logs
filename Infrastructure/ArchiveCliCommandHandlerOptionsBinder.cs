@@ -4,7 +4,7 @@ using mcy.Tools.Models;
 
 namespace mcy.Tools.Infrastructure.Cli;
 
-public class ArchiveCommandHandlerOptionsBinder: BinderBase<ArchiveCommandHandlerOptions>
+public class ArchiveCliCommandHandlerOptionsBinder: BinderBase<ArchiveCliCommandHandlerOptions>
 {
     private readonly Option<bool> _dryRunOption;
     private readonly Option<bool> _deleteFilesOption;
@@ -13,7 +13,7 @@ public class ArchiveCommandHandlerOptionsBinder: BinderBase<ArchiveCommandHandle
     private readonly Option<ArchiveLogFileTypes> _archiveLogFileTypeOption;
     private readonly Option<FileInfo> _pathTo7ZipOption;
 
-    public ArchiveCommandHandlerOptionsBinder(
+    public ArchiveCliCommandHandlerOptionsBinder(
         Option<bool> dryRunOption,
         Option<bool> deleteFilesOption,
         Option<bool> directoriesFromConfigurationFileOption,
@@ -29,8 +29,8 @@ public class ArchiveCommandHandlerOptionsBinder: BinderBase<ArchiveCommandHandle
         _pathTo7ZipOption = pathTo7ZipOption;
     }
 
-    protected override ArchiveCommandHandlerOptions GetBoundValue(BindingContext bindingContext) => 
-        new ArchiveCommandHandlerOptions
+    protected override ArchiveCliCommandHandlerOptions GetBoundValue(BindingContext bindingContext) => 
+        new ArchiveCliCommandHandlerOptions
         {
             IsDryRun = bindingContext.ParseResult.GetValueForOption(_dryRunOption),
             IsDeleteFiles = bindingContext.ParseResult.GetValueForOption(_deleteFilesOption),

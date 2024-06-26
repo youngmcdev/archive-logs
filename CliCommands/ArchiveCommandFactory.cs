@@ -1,44 +1,33 @@
-using System.CommandLine;
-using System.Text;
-using mcy.Tools.Infrastructure;
+﻿using System.CommandLine;
+using mcy.Tools.CliOptions;
 using mcy.Tools.Infrastructure.Cli;
-using mcy.Tools.Models;
+using mcy.Tools.Infrastructure;
 using mcy.Tools.Models.AppSettings;
-using mcy.Tools.Options;
+using mcy.Tools.Models;
 using mcy.Tools.Services;
+using System.Text;
 using Microsoft.Extensions.Options;
 
-namespace mcy.Tools.Commands;
+namespace mcy.Tools.CliCommands;
 
-public interface ICommandFactory
-{
-    abstract Command CreateCommand();
-}
-public abstract class CommandFactory: ICommandFactory
-{
-    protected Command _command;
-
-    public abstract Command CreateCommand();
-}
-
-public interface ICommandFactoryArchive: ICommandFactory{}
-public class CommandFactoryArchive: CommandFactory, ICommandFactoryArchive
+public interface ICommandFactoryArchive : ICliCommandFactory { }
+public class ArchiveCommandFactory : CliCommandFactory, ICommandFactoryArchive
 {
     private readonly ArchiveOptions _config;
-    private readonly ILogger<CommandFactoryArchive> _logger;
-    private readonly IOptionValidationService _optionValidationService;
-    private readonly IOptionFactoryBool _boolOptionFactory;
-    private readonly IOptionFactoryScalar<FileInfo> _fileOptionFactory;
-    private readonly IOptionFactoryScalar<IEnumerable<DirectoryInfo>> _directoriesOptionFactory;
-    private readonly IOptionFactoryScalar<ArchiveLogFileTypes> _fileTypeOptionFactory;
-    public CommandFactoryArchive(
+    private readonly ILogger<ArchiveCommandFactory> _logger;
+    private readonly ICliOptionValidationService _optionValidationService;
+    private readonly IBoolCliOptionFactory _boolOptionFactory;
+    private readonly ICliOptionFactory<FileInfo> _fileOptionFactory;
+    private readonly ICliOptionFactory<IEnumerable<DirectoryInfo>> _directoriesOptionFactory;
+    private readonly ICliOptionFactory<ArchiveLogFileTypes> _fileTypeOptionFactory;
+    public ArchiveCommandFactory(
         IOptions<ArchiveOptions> config,
-        ILogger<CommandFactoryArchive> logger,
-        IOptionValidationService optionValidationService,
-        IOptionFactoryBool boolOptionFactory,
-        IOptionFactoryScalar<FileInfo> fileOptionFactory,
-        IOptionFactoryScalar<IEnumerable<DirectoryInfo>> filesOptionFactory,
-        IOptionFactoryScalar<ArchiveLogFileTypes> fileTypeOptionFactory
+        ILogger<ArchiveCommandFactory> logger,
+        ICliOptionValidationService optionValidationService,
+        IBoolCliOptionFactory boolOptionFactory,
+        ICliOptionFactory<FileInfo> fileOptionFactory,
+        ICliOptionFactory<IEnumerable<DirectoryInfo>> filesOptionFactory,
+        ICliOptionFactory<ArchiveLogFileTypes> fileTypeOptionFactory
     )
     {
         _config = config.Value;
@@ -52,23 +41,26 @@ public class CommandFactoryArchive: CommandFactory, ICommandFactoryArchive
 
     public override Command CreateCommand()
     {
-        var dryRunOption = _boolOptionFactory.CreateOption(new CreateOptionRequestBool{
+        var dryRunOption = _boolOptionFactory.CreateOption(new CreateBoolCliOptionRequest
+        {
             Name = "--dry-run",
             Description = "If true, the archiving will to occur. However, the directories and files will be iterated over, and logging will be written. Defaults to false."
         });
 
-        var deleteFilesOption = _boolOptionFactory.CreateOption(new CreateOptionRequestBool{
+        var deleteFilesOption = _boolOptionFactory.CreateOption(new CreateBoolCliOptionRequest
+        {
             Name = "--delete-files",
             Alias = "-del",
             Description = "If true, the original, archived files will be deleted. Defaults to false."
         });
-        
-        var directoriesFromConfigurationFile = _boolOptionFactory.CreateOption(new CreateOptionRequestBool{
+
+        var directoriesFromConfigurationFile = _boolOptionFactory.CreateOption(new CreateBoolCliOptionRequest
+        {
             Name = "--directories-from-config",
             Description = "If true, then --directories is ignored. Multiple sets of directories and their respective --log-file-type values may be specified in appsettings.json. This is a way to queue multiple runs of the archive command. Defaults to false."
         });
 
-        var directoriesOption = _directoriesOptionFactory.CreateOption(new CreateOptionRequestScalar<IEnumerable<DirectoryInfo>>
+        var directoriesOption = _directoriesOptionFactory.CreateOption(new CreateCliOptionRequest<IEnumerable<DirectoryInfo>>
         {
             Name = "--directories",
             Alias = "-d",
@@ -79,14 +71,14 @@ public class CommandFactoryArchive: CommandFactory, ICommandFactoryArchive
             ParseArgumentDelegate = result => {
                 var filteredDirectories = new List<DirectoryInfo>();
                 var sb = new StringBuilder();
-                foreach(var t in result.Tokens)
+                foreach (var t in result.Tokens)
                 {
                     var filePath = t.Value;
-                    sb.AppendFormat("{0}{1}", (sb.Length > 0 ? ", ": String.Empty), filePath);
+                    sb.AppendFormat("{0}{1}", (sb.Length > 0 ? ", " : String.Empty), filePath);
                     var exists = Directory.Exists(filePath);
-                    
-                    if(exists)
-                    { 
+
+                    if (exists)
+                    {
                         filteredDirectories.Add(new DirectoryInfo(filePath));
                     }
                     else
@@ -99,7 +91,8 @@ public class CommandFactoryArchive: CommandFactory, ICommandFactoryArchive
             }
         });
 
-        var pathTo7zipOption = _fileOptionFactory.CreateOption(new CreateOptionRequestScalar<FileInfo>{
+        var pathTo7zipOption = _fileOptionFactory.CreateOption(new CreateCliOptionRequest<FileInfo>
+        {
             Name = "--path-to-zip",
             Alias = "-7z",
             Description = "Path to the 7-zip program. Overrides the value in appSettings.json.",
@@ -125,13 +118,14 @@ public class CommandFactoryArchive: CommandFactory, ICommandFactoryArchive
             }
         });
 
-        var logFileTypeOption = _fileTypeOptionFactory.CreateOption(new CreateOptionRequestScalar<ArchiveLogFileTypes>{
-            Name = "--log-file-type", 
+        var logFileTypeOption = _fileTypeOptionFactory.CreateOption(new CreateCliOptionRequest<ArchiveLogFileTypes>
+        {
+            Name = "--log-file-type",
             Alias = "-t",
             Description = "The type of log file that will be looked for in the directories specified. Other file will be ignored. A file type uses a regular expression to compare to file names and expects the date to be in the file name at a specific, relative location in the file name.",
             IsRequired = true
         });
-        
+
         _command = new Command("archive", "Archive log files and optionally delete the original files.")
         {
             dryRunOption,
@@ -144,13 +138,12 @@ public class CommandFactoryArchive: CommandFactory, ICommandFactoryArchive
 
         _command.AddAlias("ark");
 
-        _command.SetHandler(archiveCommandHandlerOptions => 
+        _command.SetHandler(archiveCommandHandlerOptions =>
         {
             _logger.LogInformation("Archive Command Handler Options: {0}", archiveCommandHandlerOptions.ToString());
-            
-        }, new ArchiveCommandHandlerOptionsBinder(dryRunOption, deleteFilesOption, directoriesFromConfigurationFile, directoriesOption, logFileTypeOption, pathTo7zipOption));
+
+        }, new ArchiveCliCommandHandlerOptionsBinder(dryRunOption, deleteFilesOption, directoriesFromConfigurationFile, directoriesOption, logFileTypeOption, pathTo7zipOption));
 
         return _command;
     }
-
 }

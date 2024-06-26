@@ -2,13 +2,14 @@ using System.Diagnostics.Metrics;
 using mcy.Tools.Models;
 using mcy.Tools.Infrastructure;
 using mcy.Tools.Models.AppSettings;
+using mcy.Tools.CliCommands;
 using mcy.Tools.Commands;
 namespace mcy.Tools.Services;
 
 public interface IArchiveCommandHandler: ICommand
 {
-    ArchiveCommandHandlerOptions HandlerOptions {get;}
-    void SetHandlerOptions(ArchiveCommandHandlerOptions handlerOptions);
+    ArchiveCliCommandHandlerOptions HandlerOptions {get;}
+    void SetHandlerOptions(ArchiveCliCommandHandlerOptions handlerOptions);
 }
 
 public class ArchiveCommandHandler: IArchiveCommandHandler
@@ -27,8 +28,8 @@ public class ArchiveCommandHandler: IArchiveCommandHandler
         _7zipCommand = cmd7zip;
         _homeDirectory = Directory.GetCurrentDirectory();
     }
-    public ArchiveCommandHandlerOptions HandlerOptions {get; protected set;}
-    public void SetHandlerOptions(ArchiveCommandHandlerOptions handlerOptions) => HandlerOptions = handlerOptions;
+    public ArchiveCliCommandHandlerOptions HandlerOptions {get; protected set;}
+    public void SetHandlerOptions(ArchiveCliCommandHandlerOptions handlerOptions) => HandlerOptions = handlerOptions;
     /* 
       Iterate over directories - Foreach directory
         - Check that it exits

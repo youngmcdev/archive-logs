@@ -1,7 +1,7 @@
 using System.CommandLine.Parsing;
 namespace mcy.Tools.Models;
 
-public class CreateOptionRequestScalar<T>: BaseCreateOptionRequest
+public class CreateCliOptionRequest<T>: BaseCreateCliOptionRequest
 {
     public bool IsRequired {get;set;}
     public bool IsDefault {get;set;}

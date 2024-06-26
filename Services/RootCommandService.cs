@@ -1,26 +1,27 @@
-using System.CommandLine;
-using System.Text;
-using mcy.Tools.Commands;
-using mcy.Tools.Infrastructure;
-using mcy.Tools.Infrastructure.Cli;
-using mcy.Tools.Models;
+using mcy.Tools.CliCommands;
 using mcy.Tools.Models.AppSettings;
-using mcy.Tools.Options;
+using mcy.Tools.Models;
+using System.CommandLine;
 using Microsoft.Extensions.Options;
 
 namespace mcy.Tools.Services;
 
-public class ArchiveRootCommandService: IRootCommandService
+public interface IRootCommandService
+{
+    RootCommand BuildRootCommand();
+}
+
+public class RootCommandService : IRootCommandService
 {
     private readonly ArchiveOptions _config;
-    private readonly ILogger<ArchiveRootCommandService> _logger;
-    private readonly IRootCommandFactory _rootCommandFactory;
+    private readonly ILogger<RootCommandService> _logger;
+    private readonly IRootCliCommandFactory _rootCommandFactory;
     private readonly ICommandFactoryArchive _archiveCommandFactory;
-    
-    public ArchiveRootCommandService(
+
+    public RootCommandService(
         IOptions<ArchiveOptions> config,
-        ILogger<ArchiveRootCommandService> logger,
-        IRootCommandFactory rootCommandFactory,
+        ILogger<RootCommandService> logger,
+        IRootCliCommandFactory rootCommandFactory,
         ICommandFactoryArchive archiveCommandFactory)
     {
         _config = config.Value;
@@ -32,11 +33,11 @@ public class ArchiveRootCommandService: IRootCommandService
     public RootCommand BuildRootCommand()
     {
         var archive = _archiveCommandFactory.CreateCommand();
-        var rootCommand = _rootCommandFactory.CreateCommand(new CreateRootCommandRequest
+        var rootCommand = _rootCommandFactory.CreateCommand(new CreateRootCliCommandRequest
         {
             Description = "Various Tools.",
             Alias = "mct",
-            Commands = new List<Command>{archive}
+            Commands = new List<Command> { archive }
         });
         return rootCommand;
     }

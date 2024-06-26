@@ -1,17 +1,17 @@
 using System.CommandLine;
 using mcy.Tools.Models;
 
-namespace mcy.Tools.Commands;
+namespace mcy.Tools.CliCommands;
 
-public interface IRootCommandFactory
+public interface IRootCliCommandFactory
 {
-    RootCommand CreateCommand(CreateRootCommandRequest request);
+    RootCommand CreateCommand(CreateRootCliCommandRequest request);
 }
 
-public class RootCommandFactory: IRootCommandFactory
+public class RootCliCommandFactory: IRootCliCommandFactory
 {
     protected RootCommand _rootCommand;
-    public RootCommand CreateCommand(CreateRootCommandRequest request)
+    public RootCommand CreateCommand(CreateRootCliCommandRequest request)
     {
         _rootCommand = new RootCommand(request.Description);
         if(!string.IsNullOrWhiteSpace(request.Alias)) _rootCommand.AddAlias(request.Alias);
