@@ -18,7 +18,7 @@ public class Program
             .AddScoped<ICommandFactoryArchive, ArchiveCommandFactory>()
             .AddScoped<IArchiveCommandHandler, ArchiveCommandHandler>()
             .AddScoped<ICliOptionValidationService, CliOptionValidationService>()
-            .AddScoped<IExecute7zip, Execute7zip>()
+            .AddScoped<IZipCommand, ZipCommand>()
             .AddScoped<IBoolCliOptionFactory, BoolCliOptionFactory>()
             .AddScoped<ICliOptionFactory<string>, CliOptionFactory<string>>()
             .AddScoped<ICliOptionFactory<int>, CliOptionFactory<int>>()

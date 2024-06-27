@@ -4,19 +4,19 @@ using mcy.Tools.Models.AppSettings;
 
 namespace mcy.Tools.Commands;
 
-public interface IExecute7zip: ICommand
+public interface IZipCommand: ICommand
 {
     string[] Files{get;}
     void SetFiles(string[] files);
 }
 
-public class Execute7zip: IExecute7zip
+public class ZipCommand: IZipCommand
 {
     public string[] Files{get;protected set;}
     public void SetFiles(string[] files) => Files = files;
     private readonly ArchiveOptions _config;
     
-    public Execute7zip(Execute7zipRequest request)
+    public ZipCommand(Execute7zipRequest request)
     {
         
     }

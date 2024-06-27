@@ -16,12 +16,12 @@ public class ArchiveCommandHandler: IArchiveCommandHandler
 {
     private readonly ILogger<ArchiveCommandHandler> _logger;
     private readonly ArchiveOptions _config;
-    private readonly IExecute7zip _7zipCommand;
+    private readonly IZipCommand _7zipCommand;
     private readonly string _homeDirectory;
     public ArchiveCommandHandler(
         ILogger<ArchiveCommandHandler> logger,
         ArchiveOptions config,
-        IExecute7zip cmd7zip)
+        IZipCommand cmd7zip)
     {
         _logger = logger;
         _config = config;

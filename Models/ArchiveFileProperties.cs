@@ -6,5 +6,5 @@ public class ArchiveFileProperties
     /// <summary>
     /// Number of bytes
     /// </summary>
-    public int FileSize{get;set;}
+    public long FileSize{get;set;}
 }
