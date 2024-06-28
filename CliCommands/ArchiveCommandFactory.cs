@@ -166,8 +166,6 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
                     _achiveActions));
                 archiveInvoker.ExecuteCommand();
             }
-
-            
         }, new ArchiveCliCommandHandlerOptionsBinder(dryRunOption, deleteFilesOption, directoriesFromConfigurationFile, directoriesOption, logFileTypeOption, pathTo7zipOption));
 
         return _command;

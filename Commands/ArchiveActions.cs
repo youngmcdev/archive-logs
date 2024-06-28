@@ -5,6 +5,7 @@ using mcy.Tools.Models;
 using mcy.Tools.Models.AppSettings;
 using mcy.Tools.Services;
 using Microsoft.Extensions.FileSystemGlobbing.Internal.PathSegments;
+using Microsoft.Extensions.FileSystemGlobbing.Internal.Patterns;
 using Microsoft.Extensions.Options;
 
 namespace mcy.Tools.Commands;
@@ -42,16 +43,18 @@ public class ArchiveActions: IArchiveActions
             _logger.LogError("The path, '{0}', could not be found.", request.PathToDirectory);
             return;
         }
-
+        
         var logFileTypeOptions =_config.ArchiveLogFileTypes.Find(z => z.LogFileType == request.LogFileType);
-        var fileNamePattern = new Regex(logFileTypeOptions?.FileNamePattern ?? string.Empty);
+        var fileNamePattern = new Regex(logFileTypeOptions?.FileNamePattern ?? "patern-not-found");
+        _logger.LogInformation("Pattern for finding file names: {0}; LogFileType: {1}", fileNamePattern, request.LogFileType);
         var files = directory.GetFiles();
         ArchiveSource.Files = MapFiles().ToList();        
         _logger.LogInformation(
-            "Archiving {0} files in {1} totaling {2} bytes.", 
+            "Archiving {0} files in {1} totaling {2} MB.", 
             ArchiveSource.Files.Count,
             directory.FullName,
-            ArchiveSource.TotalBytes);
+            Math.Round((double)ArchiveSource.TotalBytes / (1024*1024), 2));
+
         IEnumerable<ArchiveFileProperties> MapFiles()
         {
             foreach(var file in files)
@@ -59,7 +62,8 @@ public class ArchiveActions: IArchiveActions
                 var filename = file.Name;
                 if(!fileNamePattern.IsMatch(filename)) continue;
                 // TODO: Check that the date in the file name is within the cutoff range.
-
+                
+                _logger.LogInformation("    FileName: {0}; Size: {1} MB;", file.Name, Math.Round((double)file.Length /(1024*1024), 2));
                 ArchiveSource.TotalBytes += file.Length;
                 yield return new ArchiveFileProperties
                 { 
