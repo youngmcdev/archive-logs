@@ -5,7 +5,7 @@ namespace mcy.Tools.Commands;
 public class ArchiveBuildSourceCommand: BaseArchiveCommand
 {
     private readonly BulidArchiveSourceRequest _request;
-    public ArchiveBuildSourceCommand(BulidArchiveSourceRequest request, ArchiveActions archive): base(archive)
+    public ArchiveBuildSourceCommand(BulidArchiveSourceRequest request, IArchiveActions archive): base(archive)
     {
         _request = request;
     }

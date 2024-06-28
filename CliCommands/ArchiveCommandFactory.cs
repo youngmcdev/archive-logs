@@ -7,27 +7,30 @@ using mcy.Tools.Models;
 using mcy.Tools.Services;
 using System.Text;
 using Microsoft.Extensions.Options;
+using mcy.Tools.Commands;
 
 namespace mcy.Tools.CliCommands;
 
-public interface ICommandFactoryArchive : ICliCommandFactory { }
-public class ArchiveCommandFactory : CliCommandFactory, ICommandFactoryArchive
+public interface IArchiveCliCommandFactory : ICliCommandFactory { }
+public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFactory
 {
     private readonly ArchiveOptions _config;
-    private readonly ILogger<ArchiveCommandFactory> _logger;
+    private readonly ILogger<ArchiveCliCommandFactory> _logger;
     private readonly ICliOptionValidationService _optionValidationService;
     private readonly IBoolCliOptionFactory _boolOptionFactory;
     private readonly ICliOptionFactory<FileInfo> _fileOptionFactory;
     private readonly ICliOptionFactory<IEnumerable<DirectoryInfo>> _directoriesOptionFactory;
     private readonly ICliOptionFactory<ArchiveLogFileTypes> _fileTypeOptionFactory;
-    public ArchiveCommandFactory(
+    private readonly IArchiveActions _achiveActions;
+    public ArchiveCliCommandFactory(
         IOptions<ArchiveOptions> config,
-        ILogger<ArchiveCommandFactory> logger,
+        ILogger<ArchiveCliCommandFactory> logger,
         ICliOptionValidationService optionValidationService,
         IBoolCliOptionFactory boolOptionFactory,
         ICliOptionFactory<FileInfo> fileOptionFactory,
         ICliOptionFactory<IEnumerable<DirectoryInfo>> filesOptionFactory,
-        ICliOptionFactory<ArchiveLogFileTypes> fileTypeOptionFactory
+        ICliOptionFactory<ArchiveLogFileTypes> fileTypeOptionFactory,
+        IArchiveActions achiveActions
     )
     {
         _config = config.Value;
@@ -37,6 +40,7 @@ public class ArchiveCommandFactory : CliCommandFactory, ICommandFactoryArchive
         _fileOptionFactory = fileOptionFactory;
         _directoriesOptionFactory = filesOptionFactory;
         _fileTypeOptionFactory = fileTypeOptionFactory;
+        _achiveActions = achiveActions;
     }
 
     public override Command CreateCommand()
@@ -141,7 +145,29 @@ public class ArchiveCommandFactory : CliCommandFactory, ICommandFactoryArchive
         _command.SetHandler(archiveCommandHandlerOptions =>
         {
             _logger.LogInformation("Archive Command Handler Options: {0}", archiveCommandHandlerOptions.ToString());
+            var currDirectory = archiveCommandHandlerOptions.Directories[0].FullName; // TODO: Loop over the directories
+            var archiveInvoker = new ArchiveInvoker();
+            archiveInvoker.SetCommand(new ArchiveBuildSourceCommand(
+                new BulidArchiveSourceRequest{
+                    LogFileType = archiveCommandHandlerOptions.ArchiveLogFileType,
+                    PathToDirectory = currDirectory
+                }, 
+                _achiveActions));
+            archiveInvoker.ExecuteCommand();
+            if(_achiveActions.ArchiveSource.Files.Count > 0) 
+            {
+                Directory.SetCurrentDirectory(currDirectory);
+                archiveInvoker.SetCommand(new ArchiveFilesCommand(
+                    new ArchiveFilesRequest{
+                        IsDryRun = archiveCommandHandlerOptions.IsDryRun,
+                        IsDeleteFiles = archiveCommandHandlerOptions.IsDeleteFiles,
+                        PathTo7Zip = archiveCommandHandlerOptions.PathTo7Zip
+                    }, 
+                    _achiveActions));
+                archiveInvoker.ExecuteCommand();
+            }
 
+            
         }, new ArchiveCliCommandHandlerOptionsBinder(dryRunOption, deleteFilesOption, directoriesFromConfigurationFile, directoriesOption, logFileTypeOption, pathTo7zipOption));
 
         return _command;

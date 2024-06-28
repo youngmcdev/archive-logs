@@ -5,7 +5,7 @@ namespace mcy.Tools.Commands;
 public class ArchiveFilesCommand: BaseArchiveCommand
 {
     private readonly ArchiveFilesRequest _request;
-    public ArchiveFilesCommand(ArchiveFilesRequest request, ArchiveActions archive): base(archive)
+    public ArchiveFilesCommand(ArchiveFilesRequest request, IArchiveActions archive): base(archive)
     {
         _request = request;
     }
@@ -18,9 +18,9 @@ public class ArchiveFilesCommand: BaseArchiveCommand
 
 public abstract class BaseArchiveCommand: ICommand
 {
-    protected ArchiveActions _archive;
+    protected IArchiveActions _archive;
 
-    public BaseArchiveCommand(ArchiveActions archive)
+    public BaseArchiveCommand(IArchiveActions archive)
     {
         _archive = archive;
     }

@@ -16,13 +16,13 @@ public class RootCommandService : IRootCommandService
     private readonly ArchiveOptions _config;
     private readonly ILogger<RootCommandService> _logger;
     private readonly IRootCliCommandFactory _rootCommandFactory;
-    private readonly ICommandFactoryArchive _archiveCommandFactory;
+    private readonly IArchiveCliCommandFactory _archiveCommandFactory;
 
     public RootCommandService(
         IOptions<ArchiveOptions> config,
         ILogger<RootCommandService> logger,
         IRootCliCommandFactory rootCommandFactory,
-        ICommandFactoryArchive archiveCommandFactory)
+        IArchiveCliCommandFactory archiveCommandFactory)
     {
         _config = config.Value;
         _logger = logger;
