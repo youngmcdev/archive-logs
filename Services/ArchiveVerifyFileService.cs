@@ -1,7 +1,7 @@
-using mcy.Tools.Models;
-using mcy.Tools.Strategies;
+using mcy.CmdTools.Models.Archive;
+using mcy.CmdTools.Strategies.Archive;
 
-namespace mcy.Tools.Services;
+namespace mcy.CmdTools.Services.Archive;
 
 public interface IArchiveVerifyFileService
 {

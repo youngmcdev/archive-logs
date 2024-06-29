@@ -1,6 +1,6 @@
-using mcy.Tools.Infrastructure;
+using mcy.CmdTools.Infrastructure;
 
-namespace mcy.Tools.Models;
+namespace mcy.CmdTools.Models.Archive;
 
 public class BulidArchiveSourceRequest
 {

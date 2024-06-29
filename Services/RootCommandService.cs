@@ -1,10 +1,10 @@
-using mcy.Tools.CliCommands;
-using mcy.Tools.Models.AppSettings;
-using mcy.Tools.Models;
+using mcy.CmdTools.CliCommands;
+using mcy.CmdTools.Models.AppSettings;
+using mcy.CmdTools.Models;
 using System.CommandLine;
 using Microsoft.Extensions.Options;
 
-namespace mcy.Tools.Services;
+namespace mcy.CmdTools.Services;
 
 public interface IRootCommandService
 {

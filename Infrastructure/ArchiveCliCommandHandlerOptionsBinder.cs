@@ -1,8 +1,8 @@
 using System.CommandLine;
 using System.CommandLine.Binding;
-using mcy.Tools.Models;
+using mcy.CmdTools.Models.Archive;
 
-namespace mcy.Tools.Infrastructure.Cli;
+namespace mcy.CmdTools.Infrastructure.Archive;
 
 public class ArchiveCliCommandHandlerOptionsBinder: BinderBase<ArchiveCliCommandHandlerOptions>
 {

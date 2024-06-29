@@ -1,4 +1,4 @@
-namespace mcy.Tools.Models;
+namespace mcy.CmdTools.Models;
 
 
 public class CreateBoolCliOptionRequest: BaseCreateCliOptionRequest{}

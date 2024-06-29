@@ -1,6 +1,6 @@
-using mcy.Tools.Models;
+using mcy.CmdTools.Models.Archive;
 
-namespace mcy.Tools.Commands;
+namespace mcy.CmdTools.Commands.Archive;
 
 public class ArchiveBuildSourceCommand: BaseArchiveCommand
 {

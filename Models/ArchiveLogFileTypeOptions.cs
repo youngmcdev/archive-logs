@@ -1,6 +1,6 @@
-using mcy.Tools.Infrastructure;
+using mcy.CmdTools.Infrastructure;
 
-namespace mcy.Tools.Models.AppSettings;
+namespace mcy.CmdTools.Models.AppSettings;
 
 public class ArchiveLogFileTypeOptions
 {

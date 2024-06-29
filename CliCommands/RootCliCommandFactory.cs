@@ -1,7 +1,7 @@
 using System.CommandLine;
-using mcy.Tools.Models;
+using mcy.CmdTools.Models;
 
-namespace mcy.Tools.CliCommands;
+namespace mcy.CmdTools.CliCommands;
 
 public interface IRootCliCommandFactory
 {

@@ -1,6 +1,6 @@
-using mcy.Tools.Models.AppSettings;
+using mcy.CmdTools.Models.AppSettings;
 
-namespace mcy.Tools.Models;
+namespace mcy.CmdTools.Models.Archive;
 
 public class ArchiveVerifyFileRequest
 {

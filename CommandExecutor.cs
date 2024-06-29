@@ -1,7 +1,7 @@
 using System.CommandLine;
-using mcy.Tools.Services;
+using mcy.CmdTools.Services;
 
-namespace mcy.Tools;
+namespace mcy.CmdTools;
 
 public interface ICommandExecutor
 {

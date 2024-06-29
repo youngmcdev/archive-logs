@@ -1,6 +1,6 @@
 using System.CommandLine;
 
-namespace mcy.Tools.CliCommands;
+namespace mcy.CmdTools.CliCommands;
 
 public interface ICliCommandFactory
 {

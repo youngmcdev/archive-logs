@@ -1,7 +1,7 @@
 ﻿using System.CommandLine;
-using mcy.Tools.Models;
+using mcy.CmdTools.Models;
 
-namespace mcy.Tools.CliOptions;
+namespace mcy.CmdTools.CliOptions;
 
 public interface ICliOptionFactory<T>
 {

@@ -1,4 +1,4 @@
-namespace mcy.Tools.Models.AppSettings;
+namespace mcy.CmdTools.Models.AppSettings;
 
 public class ArchiveOptions
 {

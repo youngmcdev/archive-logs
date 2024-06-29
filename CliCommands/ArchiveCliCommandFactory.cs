@@ -1,24 +1,21 @@
 ﻿using System.CommandLine;
-using mcy.Tools.CliOptions;
-using mcy.Tools.Infrastructure.Cli;
-using mcy.Tools.Infrastructure;
-using mcy.Tools.Models.AppSettings;
-using mcy.Tools.Models;
-using mcy.Tools.Services;
-using System.Text;
+using mcy.CmdTools.CliOptions;
+using mcy.CmdTools.Infrastructure.Archive;
+using mcy.CmdTools.Infrastructure;
+using mcy.CmdTools.Models.AppSettings;
+using mcy.CmdTools.Models;
 using Microsoft.Extensions.Options;
-using mcy.Tools.Commands;
-using System.Reflection.Metadata;
+using mcy.CmdTools.Commands.Archive;
 using System.CommandLine.Parsing;
+using mcy.CmdTools.Models.Archive;
 
-namespace mcy.Tools.CliCommands;
+namespace mcy.CmdTools.CliCommands;
 
 public interface IArchiveCliCommandFactory : ICliCommandFactory { }
 public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFactory
 {
     private readonly ArchiveOptions _config;
     private readonly ILogger<ArchiveCliCommandFactory> _logger;
-    private readonly ICliOptionValidationService _optionValidationService;
     private readonly IBoolCliOptionFactory _boolOptionFactory;
     private readonly ICliOptionFactory<FileInfo> _fileOptionFactory;
     private readonly ICliOptionFactory<IEnumerable<DirectoryInfo>> _directoriesOptionFactory;
@@ -27,7 +24,6 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
     public ArchiveCliCommandFactory(
         IOptions<ArchiveOptions> config,
         ILogger<ArchiveCliCommandFactory> logger,
-        ICliOptionValidationService optionValidationService,
         IBoolCliOptionFactory boolOptionFactory, // TODO: Perhaps an abstract factory would help reduce the number of dependencies being injected.
         ICliOptionFactory<FileInfo> fileOptionFactory,
         ICliOptionFactory<IEnumerable<DirectoryInfo>> filesOptionFactory,
@@ -37,7 +33,6 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
     {
         _config = config.Value;
         _logger = logger;
-        _optionValidationService = optionValidationService;
         _boolOptionFactory = boolOptionFactory;
         _fileOptionFactory = fileOptionFactory;
         _directoriesOptionFactory = filesOptionFactory;

@@ -1,4 +1,4 @@
-namespace mcy.Tools.Commands;
+namespace mcy.CmdTools.Commands.Archive;
 
 public class ArchiveInvoker
 {

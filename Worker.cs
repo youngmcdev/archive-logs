@@ -1,4 +1,4 @@
-namespace mcy.Tools.ArchiveLogs;
+namespace mcy.CmdTools;
 
 public class Worker : BackgroundService
 {

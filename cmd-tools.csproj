@@ -4,14 +4,14 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>dotnet-archive_logs-f0f64cbf-1865-42d6-8cdf-6833c7a74d2b</UserSecretsId>
-    <RootNamespace>mcy.Tools</RootNamespace>
+    <UserSecretsId>dotnet-cmd-tools-f0f64cbf-1865-42d6-8cdf-6833c7a74d2b</UserSecretsId>
+    <RootNamespace>mcy.CmdTools</RootNamespace>
     <Version>24.06.14.00</Version>
     <AssemblyVersion>24.06.14.00</AssemblyVersion>
     <FileVersion>24.06.14.00</FileVersion>
     <Company></Company>
     <Authors></Authors>
-    <Product>Archive Logs</Product>
+    <Product>Cli Tools</Product>
     <Description />
     <Copyright>Copyright © 2024</Copyright>
   </PropertyGroup>

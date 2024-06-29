@@ -1,6 +1,6 @@
 using System.CommandLine;
 
-namespace mcy.Tools.Models;
+namespace mcy.CmdTools.Models;
 
 public class CreateCliCommandRequest : BaseCreateCliCommandRequest
 {

@@ -1,22 +1,23 @@
-using mcy.Tools.CliCommands;
-using mcy.Tools.Infrastructure;
-using mcy.Tools.Models.AppSettings;
-using mcy.Tools.CliOptions;
-using mcy.Tools.Services;
-using mcy.Tools.Commands;
-namespace mcy.Tools.ArchiveLogs;
+using mcy.CmdTools.CliCommands;
+using mcy.CmdTools.Infrastructure;
+using mcy.CmdTools.Models.AppSettings;
+using mcy.CmdTools.CliOptions;
+using mcy.CmdTools.Services;
+using mcy.CmdTools.Commands.Archive;
+
+namespace mcy.CmdTools;
 
 public class Program
 {
     public static void Main(string[] args)
     {
+        // TODO: Add logging to a file.
         var builder = Host.CreateApplicationBuilder(args);
         builder.Services.Configure<ArchiveOptions>(builder.Configuration.GetSection(ArchiveOptions.Archive));
         builder.Services.AddHostedService<Worker>()
             .AddScoped<IRootCommandService, RootCommandService>()
             .AddScoped<IRootCliCommandFactory, RootCliCommandFactory>()
             .AddScoped<IArchiveCliCommandFactory, ArchiveCliCommandFactory>()
-            .AddScoped<ICliOptionValidationService, CliOptionValidationService>()
             .AddScoped<IArchiveActions, ArchiveActions>()
             .AddScoped<IBoolCliOptionFactory, BoolCliOptionFactory>()
             .AddScoped<ICliOptionFactory<string>, CliOptionFactory<string>>()

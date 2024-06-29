@@ -1,4 +1,4 @@
-namespace mcy.Tools.Infrastructure;
+namespace mcy.CmdTools.Infrastructure;
 
 public static class Utility
 {

@@ -1,8 +1,7 @@
-using System.Dynamic;
 using System.Text.RegularExpressions;
-using mcy.Tools.Models;
+using mcy.CmdTools.Models.Archive;
 
-namespace mcy.Tools.Strategies;
+namespace mcy.CmdTools.Strategies.Archive;
 
 public interface IArchiveVerifyFileStrategy
 {
@@ -71,54 +70,5 @@ public abstract class ArchiveVerifyFileStrategy: IArchiveVerifyFileStrategy
     protected void Log(string msg)
     {
         if(_logger is not null) _logger.LogInformation(msg);
-    }
-}
-
-public class ArchiveVerifyFileStrategy_yyMMdd: ArchiveVerifyFileStrategy
-{
-    public ArchiveVerifyFileStrategy_yyMMdd(ArchiveVerifyFileRequest request, ILogger? logger = null):base(request, logger){}
-
-    protected override DateTime ParseToDateTime(string dateString)
-    {
-        int year = int.Parse($"20{dateString.Substring(0,2)}"),
-            month = int.Parse(dateString.Substring(2,2)),
-            day = int.Parse(dateString.Substring(4,2));
-        return new DateTime(year, month, day, 0, 0, 0, DateTimeKind.Local);
-    }
-}
-
-public class ArchiveVerifyFileStrategy_yyyyMM: ArchiveVerifyFileStrategy
-{
-    public ArchiveVerifyFileStrategy_yyyyMM(ArchiveVerifyFileRequest request, ILogger? logger = null):base(request, logger){}
-
-    protected override DateTime ParseToDateTime(string dateString)
-    {
-        int year = int.Parse(dateString.Substring(0,4)),
-            month = int.Parse(dateString.Substring(4,2)),
-            day = 27;
-        return new DateTime(year, month, day, 0, 0, 0, DateTimeKind.Local);
-    }
-}
-
-public class ArchiveVerifyFileStrategy_yyyyMMdd: ArchiveVerifyFileStrategy
-{
-    public ArchiveVerifyFileStrategy_yyyyMMdd(ArchiveVerifyFileRequest request, ILogger? logger = null):base(request, logger){}
-
-    protected override DateTime ParseToDateTime(string dateString)
-    {
-        int year = int.Parse(dateString.Substring(0,4)),
-            month = int.Parse(dateString.Substring(4,2)),
-            day = int.Parse(dateString.Substring(6,2));
-        return new DateTime(year, month, day, 0, 0, 0, DateTimeKind.Local);
-    }
-}
-
-public class ArchiveVerifyFileStrategy_yyyy_MM_dd: ArchiveVerifyFileStrategy
-{
-    public ArchiveVerifyFileStrategy_yyyy_MM_dd(ArchiveVerifyFileRequest request, ILogger? logger = null):base(request, logger){}
-
-    protected override DateTime ParseToDateTime(string dateString)
-    {
-        return DateTime.Parse(dateString);
     }
 }

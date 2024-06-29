@@ -1,15 +1,12 @@
 using System.Diagnostics;
-using System.Text.RegularExpressions;
-using mcy.Tools.Infrastructure;
-using mcy.Tools.Models;
-using mcy.Tools.Models.AppSettings;
-using mcy.Tools.Services;
-using mcy.Tools.Strategies;
-using Microsoft.Extensions.FileSystemGlobbing.Internal.PathSegments;
-using Microsoft.Extensions.FileSystemGlobbing.Internal.Patterns;
+using mcy.CmdTools.Infrastructure;
+using mcy.CmdTools.Models.Archive;
+using mcy.CmdTools.Models.AppSettings;
+using mcy.CmdTools.Services.Archive;
+using mcy.CmdTools.Strategies.Archive;
 using Microsoft.Extensions.Options;
 
-namespace mcy.Tools.Commands;
+namespace mcy.CmdTools.Commands.Archive;
 public interface IArchiveActions
 {
     ArchiveFileSource ArchiveSource {get;}
