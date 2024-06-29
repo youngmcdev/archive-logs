@@ -37,7 +37,7 @@ public class CliOptionFactory<T> : BaseCliOptionFactory<T, CreateCliOptionReques
 
         if (!string.IsNullOrWhiteSpace(request.Alias)) _option.AddAlias(request.Alias);
 
-        Console.WriteLine("Name:{0} OptionFlag:{1}  RequestFlag:{2}", request.Name, _option.AllowMultipleArgumentsPerToken, request.AllowMultipleArgumentsPerToken);
+        //Console.WriteLine("Name:{0} OptionFlag:{1}  RequestFlag:{2}", request.Name, _option.AllowMultipleArgumentsPerToken, request.AllowMultipleArgumentsPerToken);
         return _option;
     }
 }

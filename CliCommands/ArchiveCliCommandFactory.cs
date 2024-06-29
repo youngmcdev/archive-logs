@@ -8,6 +8,8 @@ using mcy.Tools.Services;
 using System.Text;
 using Microsoft.Extensions.Options;
 using mcy.Tools.Commands;
+using System.Reflection.Metadata;
+using System.CommandLine.Parsing;
 
 namespace mcy.Tools.CliCommands;
 
@@ -42,7 +44,18 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
         _fileTypeOptionFactory = fileTypeOptionFactory;
         _achiveActions = achiveActions;
     }
+    /* 
+      Iterate over directories - Foreach directory
+        - Check that it exits
+        - Change current directory to that location
+        - Get list of files in directory that match the regex - I think this is the "strategy"
+        - Get stats: # of files to be archived and # of bytes
+        - Create archive file name and full path
+        - Determine whether original files will be deleted and build 7zip command
+        - Execute 7zip command
+        - Change current directory back to original
 
+    */
     public override Command CreateCommand()
     {
         var dryRunOption = _boolOptionFactory.CreateOption(new CreateBoolCliOptionRequest
@@ -72,27 +85,7 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
             IsRequired = true,
             IsDefault = true,
             AllowMultipleArgumentsPerToken = true,
-            ParseArgumentDelegate = result => {
-                var filteredDirectories = new List<DirectoryInfo>();
-                var sb = new StringBuilder();
-                foreach (var t in result.Tokens)
-                {
-                    var filePath = t.Value;
-                    sb.AppendFormat("{0}{1}", (sb.Length > 0 ? ", " : String.Empty), filePath);
-                    var exists = Directory.Exists(filePath);
-
-                    if (exists)
-                    {
-                        filteredDirectories.Add(new DirectoryInfo(filePath));
-                    }
-                    else
-                    {
-                        result.ErrorMessage = $"Directory, {filePath}, could not be found. Please ensure the directories to be processed exist.";
-                    }
-                }
-                _logger.LogInformation("Directories to be processed: {0}", sb.ToString());
-                return filteredDirectories;
-            }
+            ParseArgumentDelegate = ParseDirectoriesDelegate
         });
 
         var pathTo7zipOption = _fileOptionFactory.CreateOption(new CreateCliOptionRequest<FileInfo>
@@ -101,25 +94,7 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
             Alias = "-7z",
             Description = "Path to the 7-zip program. Overrides the value in appSettings.json.",
             IsDefault = true,
-            ParseArgumentDelegate = result => {
-                var filePath = String.Empty;
-                if (result.Tokens.Count < 1)
-                {
-                    // Grab the value from appsettings.json 
-                    filePath = _config.PathTo7Zip;
-                }
-                else
-                {
-                    // Value from command line
-                    filePath = result.Tokens.Single().Value;
-                }
-                if (!File.Exists(filePath))
-                {
-                    result.ErrorMessage = $"File, {filePath}, could not be found. Please locate the 7zip executable on your system and provide it to the --path-to-7zip option. Alternatively, update appsettings.json.";
-                }
-                _logger.LogInformation("7zip location: {0}", filePath);
-                return new FileInfo(filePath);
-            }
+            ParseArgumentDelegate = ParsePathToZipDelegate
         });
 
         var logFileTypeOption = _fileTypeOptionFactory.CreateOption(new CreateCliOptionRequest<ArchiveLogFileTypes>
@@ -142,32 +117,81 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
 
         _command.AddAlias("ark");
 
-        _command.SetHandler(archiveCommandHandlerOptions =>
+        _command.SetHandler(
+            CommandHandler, 
+            new ArchiveCliCommandHandlerOptionsBinder(dryRunOption, deleteFilesOption, directoriesFromConfigurationFile, directoriesOption, logFileTypeOption, pathTo7zipOption));
+
+        return _command;
+    }
+
+    private void CommandHandler(ArchiveCliCommandHandlerOptions archiveCommandHandlerOptions)
+    {
+        _logger.LogInformation("Archive Command Handler Options: {0}", archiveCommandHandlerOptions.ToString());
+        var currDirectory = archiveCommandHandlerOptions.Directories[0].FullName; // TODO: Loop over the directories
+        var archiveInvoker = new ArchiveInvoker();
+        archiveInvoker.SetCommand(new ArchiveBuildSourceCommand(
+            new BulidArchiveSourceRequest{
+                LogFileType = archiveCommandHandlerOptions.ArchiveLogFileType,
+                DirectoryFullPath = currDirectory
+            }, 
+            _achiveActions));
+        archiveInvoker.ExecuteCommand();
+        if(_achiveActions.ArchiveSource.Files.Count > 0) 
         {
-            _logger.LogInformation("Archive Command Handler Options: {0}", archiveCommandHandlerOptions.ToString());
-            var currDirectory = archiveCommandHandlerOptions.Directories[0].FullName; // TODO: Loop over the directories
-            var archiveInvoker = new ArchiveInvoker();
-            archiveInvoker.SetCommand(new ArchiveBuildSourceCommand(
-                new BulidArchiveSourceRequest{
-                    LogFileType = archiveCommandHandlerOptions.ArchiveLogFileType,
-                    PathToDirectory = currDirectory
+            Directory.SetCurrentDirectory(currDirectory);
+            archiveInvoker.SetCommand(new ArchiveFilesCommand(
+                new ArchiveFilesRequest{
+                    IsDryRun = archiveCommandHandlerOptions.IsDryRun,
+                    IsDeleteFiles = archiveCommandHandlerOptions.IsDeleteFiles,
+                    PathTo7Zip = archiveCommandHandlerOptions.PathTo7Zip
                 }, 
                 _achiveActions));
             archiveInvoker.ExecuteCommand();
-            if(_achiveActions.ArchiveSource.Files.Count > 0) 
-            {
-                Directory.SetCurrentDirectory(currDirectory);
-                archiveInvoker.SetCommand(new ArchiveFilesCommand(
-                    new ArchiveFilesRequest{
-                        IsDryRun = archiveCommandHandlerOptions.IsDryRun,
-                        IsDeleteFiles = archiveCommandHandlerOptions.IsDeleteFiles,
-                        PathTo7Zip = archiveCommandHandlerOptions.PathTo7Zip
-                    }, 
-                    _achiveActions));
-                archiveInvoker.ExecuteCommand();
-            }
-        }, new ArchiveCliCommandHandlerOptionsBinder(dryRunOption, deleteFilesOption, directoriesFromConfigurationFile, directoriesOption, logFileTypeOption, pathTo7zipOption));
+        }
+    }
 
-        return _command;
+    // T ParseArgument<out T>(ArgumentResult result)
+    private FileInfo ParsePathToZipDelegate(ArgumentResult result)
+    {
+        var filePath = String.Empty;
+        if (result.Tokens.Count < 1)
+        {
+            // Grab the value from appsettings.json 
+            filePath = _config.PathTo7Zip;
+        }
+        else
+        {
+            // Value from command line
+            filePath = result.Tokens.Single().Value;
+        }
+        if (!File.Exists(filePath))
+        {
+            result.ErrorMessage = $"File, {filePath}, could not be found. Please locate the 7zip executable on your system and provide it to the --path-to-7zip option. Alternatively, update appsettings.json.";
+        }
+        
+        return new FileInfo(filePath);
+    }
+
+    private IEnumerable<DirectoryInfo> ParseDirectoriesDelegate(ArgumentResult result)
+    {
+        var filteredDirectories = new List<DirectoryInfo>();
+        var sb = new StringBuilder();
+        foreach (var t in result.Tokens)
+        {
+            var filePath = t.Value;
+            sb.AppendFormat("{0}{1}", (sb.Length > 0 ? ", " : String.Empty), filePath);
+            var exists = Directory.Exists(filePath);
+
+            if (exists)
+            {
+                filteredDirectories.Add(new DirectoryInfo(filePath));
+            }
+            else
+            {
+                result.ErrorMessage = $"Directory, {filePath}, could not be found. Please ensure the directories to be processed exist.";
+            }
+        }
+        
+        return filteredDirectories;
     }
 }
