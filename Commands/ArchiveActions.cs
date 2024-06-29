@@ -99,8 +99,10 @@ public class ArchiveActions: IArchiveActions
             LogFileTypeOptions = logFileTypeOptions,
             ThresholdForArchivingFile = thresholdDate
         };
-        // TODO: get strategy based on logFileTypeOptions.LogFileType
-        var verifier = new ArchiveVerifyFileService(new ArchiveVerifyIisFileStrategy(verifyFileRequest, _logger)); 
+        
+        var strategy = GetVerifyFileStrategy(verifyFileRequest);
+        strategy.SetLogger(_logger); // This is for development only.
+        var verifier = new ArchiveVerifyFileService(strategy);
         
         _logger.LogInformation("Threshold Date: {0}; Date Offset: {1}", thresholdDate.ToString(), _config.NumberOfDaysToKeepFiles);
         foreach(var file in files)
@@ -112,6 +114,19 @@ public class ArchiveActions: IArchiveActions
             ArchiveSource.TotalBytes += file.Length;
             yield return result;
         }
+    }
+
+    private IArchiveVerifyFileStrategy GetVerifyFileStrategy(ArchiveVerifyFileRequest request)
+    {
+        IArchiveVerifyFileStrategy strategy = request.LogFileTypeOptions.LogFileType switch
+        {
+            ArchiveLogFileTypes.IIS => new ArchiveVerifyFileStrategy_yyMMdd(request),
+            ArchiveLogFileTypes.SmsItsMe or ArchiveLogFileTypes.PibBizLink or ArchiveLogFileTypes.ApiPlatformSettings or ArchiveLogFileTypes.ApiVersions => new ArchiveVerifyFileStrategy_yyyyMMdd(request),
+            ArchiveLogFileTypes.SplashPageManager or ArchiveLogFileTypes.PibItsMe or ArchiveLogFileTypes.GoItsMe => new ArchiveVerifyFileStrategy_yyyyMM(request),
+            _ => new ArchiveVerifyFileStrategy_yyyy_MM_dd(request)
+        };
+
+        return strategy;
     }
 
     private ProcessStartInfo GetStartInfo(ArchiveFilesRequest request)

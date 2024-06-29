@@ -2,7 +2,6 @@ using mcy.Tools.Infrastructure;
 
 namespace mcy.Tools.Models;
 
-[Serializable]
 public class ArchiveCliCommandHandlerOptions
 {
     public bool IsDryRun{get;set;}

@@ -128,30 +128,33 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
     {
         _logger.LogInformation("Archive Command Handler Options: {0}", archiveCommandHandlerOptions.ToString());
 
-        var currDirectory = archiveCommandHandlerOptions.Directories[0].FullName; // TODO: Loop over the directories
-        var archiveInvoker = new ArchiveInvoker();
-        archiveInvoker.SetCommand(new ArchiveBuildSourceCommand(
-            new BulidArchiveSourceRequest{
-                LogFileType = archiveCommandHandlerOptions.ArchiveLogFileType,
-                DirectoryFullPath = currDirectory
-            }, 
-            _achiveActions));
-        archiveInvoker.ExecuteCommand();
-        
-        if(_achiveActions.ArchiveSource.Files.Count < 1) return;
-        
-        Directory.SetCurrentDirectory(currDirectory);
-        archiveInvoker.SetCommand(new ArchiveFilesCommand(
-            new ArchiveFilesRequest{
-                IsDryRun = archiveCommandHandlerOptions.IsDryRun,
-                IsDeleteFiles = archiveCommandHandlerOptions.IsDeleteFiles,
-                PathTo7Zip = archiveCommandHandlerOptions.PathTo7Zip
-            }, 
-            _achiveActions));
-        archiveInvoker.ExecuteCommand();
+        foreach(var currDirectory in archiveCommandHandlerOptions.Directories) {ProcessDirectory(currDirectory);}
+
+        void ProcessDirectory(DirectoryInfo dirInfo)
+        {
+            var archiveInvoker = new ArchiveInvoker();
+            archiveInvoker.SetCommand(new ArchiveBuildSourceCommand(
+                new BulidArchiveSourceRequest{
+                    LogFileType = archiveCommandHandlerOptions.ArchiveLogFileType,
+                    DirectoryFullPath = dirInfo.FullName
+                }, 
+                _achiveActions));
+            archiveInvoker.ExecuteCommand();
+            
+            if(_achiveActions.ArchiveSource.Files.Count < 1) return;
+            
+            Directory.SetCurrentDirectory(dirInfo.FullName);
+            archiveInvoker.SetCommand(new ArchiveFilesCommand(
+                new ArchiveFilesRequest{
+                    IsDryRun = archiveCommandHandlerOptions.IsDryRun,
+                    IsDeleteFiles = archiveCommandHandlerOptions.IsDeleteFiles,
+                    PathTo7Zip = archiveCommandHandlerOptions.PathTo7Zip
+                }, 
+                _achiveActions));
+            archiveInvoker.ExecuteCommand();
+        }
     }
 
-    // T ParseArgument<out T>(ArgumentResult result)
     private FileInfo ParsePathToZipDelegate(ArgumentResult result)
     {
         var filePath = String.Empty;
