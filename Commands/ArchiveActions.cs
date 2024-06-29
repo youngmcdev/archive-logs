@@ -20,7 +20,7 @@ public class ArchiveActions: IArchiveActions
 {
     private readonly ArchiveOptions _config;
     private readonly ILogger<ArchiveActions> _logger;
-    // {path-to-7zip} a -t7z -m0=lzma -mx=5 -y -sdel {archive-file-name} {list-of-files-to-archive}
+    // a -t7z -m0=lzma -mx=5 -y -sdel {archive-file-name} {list-of-files-to-archive}
     private const string ZipCommandArgsWithDelete = "a -t7z -m0=lzma -mx=5 -y -sdel {0} {1}";
     private const string ZipCommandArgsWithoutDelete = "a -t7z -m0=lzma -mx=5 -y {0} {1}";
     public ArchiveFileSource ArchiveSource {get;protected set;} = new();
@@ -70,16 +70,20 @@ public class ArchiveActions: IArchiveActions
             using(var process = new Process())
             {
                 process.StartInfo = startInfo;
-                if(!request.IsDryRun)
+                if(request.IsDryRun)
                 {
-                    //process.Start();
-                    string stdo = process.StandardOutput.ReadToEnd();
-                    string stde = process.StandardError.ReadToEnd();
-                    process.WaitForExit();
-                    _logger.LogInformation("Finished archiving files in {0}.", startInfo.WorkingDirectory);
-                    _logger.LogInformation(stdo);
-                    _logger.LogError(stde);
+                    _logger.LogInformation("The --dry-run option was selected. The files will not be archived.");
+                    return;
                 }
+                
+                _logger.LogInformation("Begin archiving files in {0}...", startInfo.WorkingDirectory);
+                process.Start();
+                string stdo = process.StandardOutput.ReadToEnd();
+                string stde = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+                _logger.LogInformation("Finished archiving files in {0}.", startInfo.WorkingDirectory);
+                _logger.LogInformation("Logging standard output of the 7zip command:{0}{1}", Environment.NewLine, stdo);
+                _logger.LogInformation("Logging standard error of the 7zip command:{0}{1}", Environment.NewLine, stde);
             }
         }
         catch(Exception e)

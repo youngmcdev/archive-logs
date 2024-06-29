@@ -28,7 +28,7 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
         IOptions<ArchiveOptions> config,
         ILogger<ArchiveCliCommandFactory> logger,
         ICliOptionValidationService optionValidationService,
-        IBoolCliOptionFactory boolOptionFactory,
+        IBoolCliOptionFactory boolOptionFactory, // TODO: Perhaps an abstract factory would help reduce the number of dependencies being injected.
         ICliOptionFactory<FileInfo> fileOptionFactory,
         ICliOptionFactory<IEnumerable<DirectoryInfo>> filesOptionFactory,
         ICliOptionFactory<ArchiveLogFileTypes> fileTypeOptionFactory,
@@ -118,15 +118,16 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
         _command.AddAlias("ark");
 
         _command.SetHandler(
-            CommandHandler, 
+            CommandHandlerDelegate, 
             new ArchiveCliCommandHandlerOptionsBinder(dryRunOption, deleteFilesOption, directoriesFromConfigurationFile, directoriesOption, logFileTypeOption, pathTo7zipOption));
 
         return _command;
     }
-
-    private void CommandHandler(ArchiveCliCommandHandlerOptions archiveCommandHandlerOptions)
+    // TODO: Possibly move these delegates to services that are injected.
+    private void CommandHandlerDelegate(ArchiveCliCommandHandlerOptions archiveCommandHandlerOptions)
     {
         _logger.LogInformation("Archive Command Handler Options: {0}", archiveCommandHandlerOptions.ToString());
+
         var currDirectory = archiveCommandHandlerOptions.Directories[0].FullName; // TODO: Loop over the directories
         var archiveInvoker = new ArchiveInvoker();
         archiveInvoker.SetCommand(new ArchiveBuildSourceCommand(
@@ -136,18 +137,18 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
             }, 
             _achiveActions));
         archiveInvoker.ExecuteCommand();
-        if(_achiveActions.ArchiveSource.Files.Count > 0) 
-        {
-            Directory.SetCurrentDirectory(currDirectory);
-            archiveInvoker.SetCommand(new ArchiveFilesCommand(
-                new ArchiveFilesRequest{
-                    IsDryRun = archiveCommandHandlerOptions.IsDryRun,
-                    IsDeleteFiles = archiveCommandHandlerOptions.IsDeleteFiles,
-                    PathTo7Zip = archiveCommandHandlerOptions.PathTo7Zip
-                }, 
-                _achiveActions));
-            archiveInvoker.ExecuteCommand();
-        }
+        
+        if(_achiveActions.ArchiveSource.Files.Count < 1) return;
+        
+        Directory.SetCurrentDirectory(currDirectory);
+        archiveInvoker.SetCommand(new ArchiveFilesCommand(
+            new ArchiveFilesRequest{
+                IsDryRun = archiveCommandHandlerOptions.IsDryRun,
+                IsDeleteFiles = archiveCommandHandlerOptions.IsDeleteFiles,
+                PathTo7Zip = archiveCommandHandlerOptions.PathTo7Zip
+            }, 
+            _achiveActions));
+        archiveInvoker.ExecuteCommand();
     }
 
     // T ParseArgument<out T>(ArgumentResult result)
@@ -175,11 +176,9 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
     private IEnumerable<DirectoryInfo> ParseDirectoriesDelegate(ArgumentResult result)
     {
         var filteredDirectories = new List<DirectoryInfo>();
-        var sb = new StringBuilder();
         foreach (var t in result.Tokens)
         {
             var filePath = t.Value;
-            sb.AppendFormat("{0}{1}", (sb.Length > 0 ? ", " : String.Empty), filePath);
             var exists = Directory.Exists(filePath);
 
             if (exists)

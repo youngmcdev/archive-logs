@@ -22,23 +22,19 @@ public abstract class ArchiveVerifyFileStrategy: IArchiveVerifyFileStrategy
 
     protected void Log(string msg)
     {
-        if(_logger is not null)
-            _logger.LogInformation(msg);
+        if(_logger is not null) _logger.LogInformation(msg);
     }
 }
 
 public class ArchiveVerifyIisFileStrategy: ArchiveVerifyFileStrategy
 {
-    public ArchiveVerifyIisFileStrategy(ArchiveVerifyFileRequest request, ILogger? logger = null):base(request, logger)
-    {
-
-    }
+    public ArchiveVerifyIisFileStrategy(ArchiveVerifyFileRequest request, ILogger? logger = null):base(request, logger){}
 
     public override ArchiveFileProperties? VerifyFile(FileInfo file)
     {
         var fileNamePattern = new Regex(_options.LogFileTypeOptions.FileNamePattern);
         var match = fileNamePattern.Match(file.Name);
-        if(!match.Success || match.Groups.Count <= _options.LogFileTypeOptions.DatePosition) {return null;}
+        if(!match.Success || match.Groups.Count <= _options.LogFileTypeOptions.DatePosition) return null;
 
         var fileNameDate = match.Groups[_options.LogFileTypeOptions.DatePosition].Value;
         

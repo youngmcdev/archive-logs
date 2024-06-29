@@ -4,6 +4,9 @@ namespace mcy.Tools.Infrastructure;
 public enum ArchiveLogFileTypes
 {
     None = 0,
+    /// <summary>
+    /// Date in Matches[2]. Date in yyMMDD format.
+    /// </summary>
     IIS = 1,
     /// <summary>
     /// Date in Matches[2]. Date in yyyyMM format.
