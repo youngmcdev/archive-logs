@@ -20,7 +20,7 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
     private readonly ICliOptionFactory<FileInfo> _fileOptionFactory;
     private readonly ICliOptionFactory<IEnumerable<DirectoryInfo>> _directoriesOptionFactory;
     private readonly ICliOptionFactory<ArchiveLogFileTypes> _fileTypeOptionFactory;
-    private readonly IArchiveActions _achiveActions;
+    private readonly IArchiveActions _archiveActions;
     public ArchiveCliCommandFactory(
         IOptions<ArchiveOptions> config,
         ILogger<ArchiveCliCommandFactory> logger,
@@ -28,7 +28,7 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
         ICliOptionFactory<FileInfo> fileOptionFactory,
         ICliOptionFactory<IEnumerable<DirectoryInfo>> filesOptionFactory,
         ICliOptionFactory<ArchiveLogFileTypes> fileTypeOptionFactory,
-        IArchiveActions achiveActions
+        IArchiveActions archiveActions
     )
     {
         _config = config.Value;
@@ -37,20 +37,9 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
         _fileOptionFactory = fileOptionFactory;
         _directoriesOptionFactory = filesOptionFactory;
         _fileTypeOptionFactory = fileTypeOptionFactory;
-        _achiveActions = achiveActions;
+        _archiveActions = archiveActions;
     }
-    /* 
-      Iterate over directories - Foreach directory
-        - Check that it exits
-        - Change current directory to that location
-        - Get list of files in directory that match the regex - I think this is the "strategy"
-        - Get stats: # of files to be archived and # of bytes
-        - Create archive file name and full path
-        - Determine whether original files will be deleted and build 7zip command
-        - Execute 7zip command
-        - Change current directory back to original
 
-    */
     public override Command CreateCommand()
     {
         var dryRunOption = _boolOptionFactory.CreateOption(new CreateBoolCliOptionRequest
@@ -118,36 +107,51 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
 
         return _command;
     }
+
+    // TODO: Need a way to queue multiple runs of the acrhive command from appsettings.json.
+
     // TODO: Possibly move these delegates to services that are injected.
     private void CommandHandlerDelegate(ArchiveCliCommandHandlerOptions archiveCommandHandlerOptions)
     {
-        _logger.LogInformation("Archive Command Handler Options: {0}", archiveCommandHandlerOptions.ToString());
+        int totalFilesArchived = 0;
+        long totalBytesArchived = 0;
+        _logger.LogInformation("Begin the file archiving process - {0}", DateTime.Now.ToString("yyyy.MM.dd hh:mm:ss zzz"));
+        _logger.LogDebug("Archive Command Options: {0}", archiveCommandHandlerOptions.ToString());
 
         foreach(var currDirectory in archiveCommandHandlerOptions.Directories) {ProcessDirectory(currDirectory);}
 
         void ProcessDirectory(DirectoryInfo dirInfo)
         {
+            _logger.LogInformation("Processing files in {0}", dirInfo.FullName);
             var archiveInvoker = new ArchiveInvoker();
             archiveInvoker.SetCommand(new ArchiveBuildSourceCommand(
-                new BulidArchiveSourceRequest{
+                new BuildArchiveSourceRequest{
                     LogFileType = archiveCommandHandlerOptions.ArchiveLogFileType,
                     DirectoryFullPath = dirInfo.FullName
                 }, 
-                _achiveActions));
+                _archiveActions));
             archiveInvoker.ExecuteCommand();
             
-            if(_achiveActions.ArchiveSource.Files.Count < 1) return;
+            if(_archiveActions.ArchiveSource.Files.Count < 1) return;
             
+            totalFilesArchived += _archiveActions.ArchiveSource.Files.Count;
+            totalBytesArchived += _archiveActions.ArchiveSource.TotalBytes;
             Directory.SetCurrentDirectory(dirInfo.FullName);
+
             archiveInvoker.SetCommand(new ArchiveFilesCommand(
                 new ArchiveFilesRequest{
                     IsDryRun = archiveCommandHandlerOptions.IsDryRun,
                     IsDeleteFiles = archiveCommandHandlerOptions.IsDeleteFiles,
                     PathTo7Zip = archiveCommandHandlerOptions.PathTo7Zip
                 }, 
-                _achiveActions));
+                _archiveActions));
             archiveInvoker.ExecuteCommand();
         }
+        _logger.LogInformation("The file archiving process is complete - {0}{1}    Number of files archived: {2} ({3}MB)", 
+            DateTime.Now.ToString("yyyy.MM.dd hh:mm:ss zzz"),
+            Environment.NewLine,
+            totalFilesArchived,
+            Math.Round((double)totalBytesArchived / (1024*1024), 2));
     }
 
     private FileInfo ParsePathToZipDelegate(ArgumentResult result)

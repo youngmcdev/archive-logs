@@ -11,7 +11,7 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        // TODO: Add logging to a file.
+        // TODO: Send logging to a file.
         var builder = Host.CreateApplicationBuilder(args);
         builder.Services.Configure<ArchiveOptions>(builder.Configuration.GetSection(ArchiveOptions.Archive));
         builder.Services.AddHostedService<Worker>()

@@ -5,12 +5,13 @@ using mcy.CmdTools.Models.AppSettings;
 using mcy.CmdTools.Services.Archive;
 using mcy.CmdTools.Strategies.Archive;
 using Microsoft.Extensions.Options;
+using System.Text;
 
 namespace mcy.CmdTools.Commands.Archive;
 public interface IArchiveActions
 {
     ArchiveFileSource ArchiveSource {get;}
-    public void BulidArchiveSource(BulidArchiveSourceRequest request);
+    public void BuildArchiveSource(BuildArchiveSourceRequest request);
     public void ArchiveFiles(ArchiveFilesRequest request);
 }
 public class ArchiveActions: IArchiveActions
@@ -18,8 +19,8 @@ public class ArchiveActions: IArchiveActions
     private readonly ArchiveOptions _config;
     private readonly ILogger<ArchiveActions> _logger;
     // a -t7z -m0=lzma -mx=5 -y -sdel {archive-file-name} {list-of-files-to-archive}
-    private const string ZipCommandArgsWithDelete = "a -t7z -m0=lzma -mx=5 -y -sdel {0} {1}";
-    private const string ZipCommandArgsWithoutDelete = "a -t7z -m0=lzma -mx=5 -y {0} {1}";
+    private const string ZipCommandArgsWithDelete = "a -t7z -m0=lzma -mx=5 -y -sdel \"{0}\" {1}";
+    private const string ZipCommandArgsWithoutDelete = "a -t7z -m0=lzma -mx=5 -y \"{0}\" {1}";
     public ArchiveFileSource ArchiveSource {get;protected set;} = new();
 
     public ArchiveActions(
@@ -31,7 +32,7 @@ public class ArchiveActions: IArchiveActions
         _logger = logger;
     }
 
-    public void BulidArchiveSource(BulidArchiveSourceRequest request)
+    public void BuildArchiveSource(BuildArchiveSourceRequest request)
     {
         ArchiveSource.Files.Clear();
         ArchiveSource.TotalBytes = 0;
@@ -55,6 +56,8 @@ public class ArchiveActions: IArchiveActions
 
     public void ArchiveFiles(ArchiveFilesRequest request)
     {
+        var endl = Environment.NewLine;
+        var sb = new StringBuilder();
         if(request.PathTo7Zip is not {} || !request.PathTo7Zip.Exists)
         {
             _logger.LogError("The path to 7-zip, '{0}', was not found.", request.PathTo7Zip?.FullName ?? string.Empty);
@@ -69,23 +72,27 @@ public class ArchiveActions: IArchiveActions
                 process.StartInfo = startInfo;
                 if(request.IsDryRun)
                 {
-                    _logger.LogInformation("The --dry-run option was selected. The files will not be archived.");
+                    sb.Append("    The --dry-run option was selected. The files will not be archived.");
                     return;
                 }
                 
-                _logger.LogInformation("Begin archiving files in {0}...", startInfo.WorkingDirectory);
+                sb.AppendFormat("{0}Begin archiving files in {1}...", sb.Length > 0 ? endl : string.Empty, startInfo.WorkingDirectory);
                 process.Start();
                 string stdo = process.StandardOutput.ReadToEnd();
                 string stde = process.StandardError.ReadToEnd();
                 process.WaitForExit();
-                _logger.LogInformation("Finished archiving files in {0}.", startInfo.WorkingDirectory);
-                _logger.LogInformation("Logging standard output of the 7zip command:{0}{1}", Environment.NewLine, stdo);
-                _logger.LogInformation("Logging standard error of the 7zip command:{0}{1}", Environment.NewLine, stde);
+                sb.AppendFormat("{0}Finished archiving files in {1}.", endl, startInfo.WorkingDirectory);
+                sb.AppendFormat("{0}Logging standard output of the 7zip command:{1}{2}", endl, endl, stdo);
+                sb.AppendFormat("{0}Logging standard error of the 7zip command:{1}{2}{3}", endl, endl, stde.Length > 0 ? stde : "No standard error output.", endl);
             }
         }
         catch(Exception e)
         {
             _logger.LogError(e, "An error occurred while archiving files. {0} {1}", e.Message, e.StackTrace);
+        }
+        finally
+        {
+            _logger.LogInformation(sb.ToString());
         }
     }
 
@@ -101,13 +108,13 @@ public class ArchiveActions: IArchiveActions
         strategy.SetLogger(_logger); // This is for development only.
         var verifier = new ArchiveVerifyFileService(strategy);
         
-        _logger.LogInformation("Threshold Date: {0}; Date Offset: {1}", thresholdDate.ToString(), _config.NumberOfDaysToKeepFiles);
+        _logger.LogInformation("Verifying files - Threshold Date: {0}; Date Offset: {1}", thresholdDate.ToString(), _config.NumberOfDaysToKeepFiles);
         foreach(var file in files)
         {
             var result = verifier.VerifyFile(file);
             if(result is null) {continue;}
 
-            _logger.LogInformation("    FileName: {0}; Size: {1} MB;", result.FileName, Math.Round((double)result.FileSize /(1024*1024), 2));
+            _logger.LogInformation("    FileName: {1}; Size: {2} MB;", result.FileName, Math.Round((double)result.FileSize /(1024*1024), 2));
             ArchiveSource.TotalBytes += file.Length;
             yield return result;
         }
@@ -129,7 +136,7 @@ public class ArchiveActions: IArchiveActions
     private ProcessStartInfo GetStartInfo(ArchiveFilesRequest request)
     {
         var (arguments, workingDirectory) = GetArgumentsAndWorkingDirectory(request);
-        _logger.LogInformation("Command to be executed: {0} {1}", request.PathTo7Zip!.FullName, arguments);
+        _logger.LogInformation("Preparing 7zip command to be executed: {0} {1}", request.PathTo7Zip!.FullName, arguments);
 
         var processStartInfo = new ProcessStartInfo(
             request.PathTo7Zip.FullName,

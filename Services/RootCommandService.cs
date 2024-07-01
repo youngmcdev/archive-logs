@@ -32,7 +32,7 @@ public class RootCommandService : IRootCommandService
 
     public RootCommand BuildRootCommand()
     {
-        _logger.LogInformation("ArchiveLogFileTypes Count:{0}{1}", Environment.NewLine, _config.ToString());
+        _logger.LogDebug("ArchiveLogFileTypes Count:{0}{1}", Environment.NewLine, _config.ToString());
         var archive = _archiveCommandFactory.CreateCommand();
         var rootCommand = _rootCommandFactory.CreateCommand(new CreateRootCliCommandRequest
         {

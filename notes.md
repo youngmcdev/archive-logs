@@ -20,7 +20,10 @@ In this project: Generates `System.Commandline` Command and Option objects.
   - `CliOptions.CliOptionFactory`
 
 #### Some Benefits
-- Something...
+
+- Tight coupling between the Factory and the Concrete Target is avoided.
+- Open/Closed Principle: New implementation of Abstract Target may be introduced without breaking existing client code.
+- Single Responsibility Principle. The logic that creates a Concrete Target may reside in one place, and that's all it does.
 
 ## Command
 
@@ -45,7 +48,12 @@ In this project...
   - `Commands.ArchiveInvoker`
 
 #### Some Benefits
-- Something...
+- Single Responsibility Principle: 
+  - The operation is fully separated from the objects it operates on.
+  - Classes that invoke operations may be decoupled from classes that perform these operations.
+- Open/Closed Principle: A new operation may be added in a separate class without modifying any existing code.
+- Provides a way to implement deferred execution of operations.
+- Combines nicely with Chain of Responsibility to create a complex operation out of multiple simple commands.
 
 ## Strategy
 
@@ -65,10 +73,13 @@ In this project: Determines the logic that's used to verify whether each file sh
 - Context: Should encapsulate the Strategy interface. Allows the calling code to... 
   1. Set its reference (Abstract Strategy) to a Concrete Strategy implementation. 
   2. Execute the _action method_ on the current implementation of the Abstract Strategy.
-  - `Commands.ArchiveActions`
+  - `Services.ArchiveVerifyFileService`
 
 #### Some Benefits
-- Something...
+- Reduction of complex, conditional logic as each type of behavior is handled by its own strategy. 
+- Algorihtms can be swapped during runtime.
+- The Context retains its Strategy potentially reducing the number of times conditional logic must be executed.
+- Open/Closed Principle: New strategies may be introduced without having to change the Context.
 
 ## Template
 
@@ -89,4 +100,6 @@ In this project: Used to define the different Strategies.
   - `Commands.ArchiveActions`
 
 #### Some Benefits
-- Something...
+- Common/duplicated code can be _moved up_ to a superclass.
+- Provides a way to define a structure for related algorithms.
+- Open/Closed Principle: Original class does not have to be changed to add new behavior.
