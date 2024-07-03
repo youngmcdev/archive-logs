@@ -108,7 +108,7 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
         return _command;
     }
 
-    // TODO: Need a way to queue multiple runs of the acrhive command from appsettings.json.
+    // TODO: Need a way to queue multiple runs of the archive command from appsettings.json.
 
     // TODO: Possibly move these delegates to services that are injected.
     private void CommandHandlerDelegate(ArchiveCliCommandHandlerOptions archiveCommandHandlerOptions)

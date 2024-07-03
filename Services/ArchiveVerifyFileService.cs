@@ -10,7 +10,7 @@ public interface IArchiveVerifyFileService
 
 public class ArchiveVerifyFileService: IArchiveVerifyFileService
 {
-    private IArchiveVerifyFileStrategy _strategy;
+    private IArchiveVerifyFileStrategy? _strategy;
 
     public ArchiveVerifyFileService(){}
 
@@ -24,5 +24,5 @@ public class ArchiveVerifyFileService: IArchiveVerifyFileService
         _strategy = strategy;
     }
 
-    public ArchiveFileProperties? VerifyFile(FileInfo file) => _strategy.VerifyFile(file);
+    public ArchiveFileProperties? VerifyFile(FileInfo file) => _strategy?.VerifyFile(file);
 }

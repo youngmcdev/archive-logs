@@ -8,7 +8,7 @@ public interface ICliCommandFactory
 }
 public abstract class CliCommandFactory: ICliCommandFactory
 {
-    protected Command _command;
+    protected Command? _command;
 
     public abstract Command CreateCommand();
 }

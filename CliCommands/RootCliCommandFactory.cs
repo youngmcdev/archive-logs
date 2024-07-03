@@ -10,7 +10,7 @@ public interface IRootCliCommandFactory
 
 public class RootCliCommandFactory: IRootCliCommandFactory
 {
-    protected RootCommand _rootCommand;
+    protected RootCommand? _rootCommand;
     public RootCommand CreateCommand(CreateRootCliCommandRequest request)
     {
         _rootCommand = new RootCommand(request.Description);
