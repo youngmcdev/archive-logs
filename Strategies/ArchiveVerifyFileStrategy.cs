@@ -34,7 +34,7 @@ public abstract class ArchiveVerifyFileStrategy: IArchiveVerifyFileStrategy
         return CompareDates(file, fileDate);
     }
 
-    protected string? GetDateFromFileName(string fileName)
+    private string? GetDateFromFileName(string fileName)
     {
         var fileNamePattern = new Regex(_options.LogFileTypeOptions.FileNamePattern);
         var match = fileNamePattern.Match(fileName);
@@ -46,7 +46,7 @@ public abstract class ArchiveVerifyFileStrategy: IArchiveVerifyFileStrategy
 
     protected abstract DateTime ParseToDateTime(string dateString);
 
-    protected ArchiveFileProperties? CompareDates(FileInfo file, DateTime fileDate)
+    private ArchiveFileProperties? CompareDates(FileInfo file, DateTime fileDate)
     {
         if(fileDate > _options.ThresholdForArchivingFile)
         {
