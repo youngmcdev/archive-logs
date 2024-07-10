@@ -118,16 +118,17 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
         _logger.LogInformation("Begin the file archiving process - {0}", DateTime.Now.ToString("yyyy.MM.dd hh:mm:ss zzz"));
         _logger.LogDebug("Archive Command Options: {0}", archiveCommandHandlerOptions.ToString());
 
-        foreach(var currDirectory in archiveCommandHandlerOptions.Directories) {ProcessDirectory(currDirectory);}
+        var directories = GetDirectoriesToProcess(archiveCommandHandlerOptions);
+        foreach(var currDirectory in directories) {ProcessDirectory(currDirectory);}
 
-        void ProcessDirectory(DirectoryInfo dirInfo)
+        void ProcessDirectory(ArchiveDirectoryToProcess dirInfo)
         {
-            _logger.LogInformation("Processing files in {0}", dirInfo.FullName);
+            _logger.LogInformation("Processing files in {0}", dirInfo.Directory.FullName);
             var archiveInvoker = new ArchiveInvoker();
             archiveInvoker.SetCommand(new ArchiveBuildSourceCommand(
                 new BuildArchiveSourceRequest{
-                    LogFileType = archiveCommandHandlerOptions.ArchiveLogFileType,
-                    DirectoryFullPath = dirInfo.FullName
+                    LogFileType = dirInfo.ArchiveLogFileType,
+                    DirectoryFullPath = dirInfo.Directory.FullName
                 }, 
                 _archiveActions));
             archiveInvoker.ExecuteCommand();
@@ -136,7 +137,7 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
             
             totalFilesArchived += _archiveActions.ArchiveSource.Files.Count;
             totalBytesArchived += _archiveActions.ArchiveSource.TotalBytes;
-            Directory.SetCurrentDirectory(dirInfo.FullName);
+            Directory.SetCurrentDirectory(dirInfo.Directory.FullName);
 
             archiveInvoker.SetCommand(new ArchiveFilesCommand(
                 new ArchiveFilesRequest{
@@ -152,6 +153,31 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
             Environment.NewLine,
             totalFilesArchived,
             Math.Round((double)totalBytesArchived / (1024*1024), 2));
+    }
+
+    private IEnumerable<ArchiveDirectoryToProcess> GetDirectoriesToProcess(ArchiveCliCommandHandlerOptions options)
+    {
+        _logger.LogInformation("Getting the directories to process.");
+        if(options.IsDirectoriesFromConfigurationFile)
+        {
+            foreach(var cmd in _config.ArchiveCommandsToInvoke)
+            {
+                foreach(var curDir in cmd.Directories)
+                {
+                    var dirInfo = new DirectoryInfo(curDir);
+                    if(!dirInfo.Exists) 
+                    {
+                        _logger.LogError("Skipping directory, '{0}'. It could not be found.", dirInfo.FullName);
+                        continue;
+                    }
+                    yield return new ArchiveDirectoryToProcess{ Directory = dirInfo, ArchiveLogFileType = cmd.LogFileType.Value};
+                }
+            }
+        }
+        else
+        {
+            foreach(var curDir in options.Directories) yield return new ArchiveDirectoryToProcess{Directory = curDir, ArchiveLogFileType = options.ArchiveLogFileType};
+        }
     }
 
     private FileInfo ParsePathToZipDelegate(ArgumentResult result)

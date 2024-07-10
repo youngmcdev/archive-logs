@@ -11,9 +11,9 @@ public class ArchiveLogFileTypeOptions
 
     public override string ToString()
     {
-        return @$"{ArchiveLogFileType}
-    LogFileType: {LogFileType}
-    FileNamePattern: {FileNamePattern}
-    DatePosition: {DatePosition}";
+        return @$"    {ArchiveLogFileType}
+        LogFileType: {LogFileType}
+        FileNamePattern: {FileNamePattern}
+        DatePosition: {DatePosition}";
     }
 }
