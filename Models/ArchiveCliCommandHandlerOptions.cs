@@ -1,4 +1,4 @@
-using mcy.CmdTools.Infrastructure;
+using mcy.CmdTools.Infrastructure.Archive;
 
 namespace mcy.CmdTools.Models.Archive;
 

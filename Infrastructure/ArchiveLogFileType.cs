@@ -1,4 +1,4 @@
-namespace mcy.CmdTools.Infrastructure;
+namespace mcy.CmdTools.Infrastructure.Archive;
 
 public enum ArchiveLogFileTypes
 {

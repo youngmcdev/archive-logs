@@ -24,5 +24,5 @@ public class ArchiveVerifyFileService: IArchiveVerifyFileService
         _strategy = strategy;
     }
 
-    public ArchiveFileProperties? VerifyFile(FileInfo file) => _strategy?.VerifyFile(file);
+    public ArchiveFileToProcess? VerifyFile(FileInfo file) => _strategy?.VerifyFile(file);
 }

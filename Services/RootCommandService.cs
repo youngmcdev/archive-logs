@@ -1,6 +1,6 @@
 using mcy.CmdTools.CliCommands;
 using mcy.CmdTools.Models.AppSettings;
-using mcy.CmdTools.Models;
+using mcy.CmdTools.Models.CliCommands;
 using System.CommandLine;
 using Microsoft.Extensions.Options;
 

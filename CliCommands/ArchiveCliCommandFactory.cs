@@ -1,9 +1,8 @@
 ﻿using System.CommandLine;
 using mcy.CmdTools.CliOptions;
 using mcy.CmdTools.Infrastructure.Archive;
-using mcy.CmdTools.Infrastructure;
 using mcy.CmdTools.Models.AppSettings;
-using mcy.CmdTools.Models;
+using mcy.CmdTools.Models.CliOptions;
 using Microsoft.Extensions.Options;
 using mcy.CmdTools.Commands.Archive;
 using System.CommandLine.Parsing;
@@ -123,12 +122,15 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
 
         void ProcessDirectory(ArchiveDirectoryToProcess dirInfo)
         {
-            _logger.LogInformation("Processing files in {0}", dirInfo.Directory.FullName);
+            var diretoryPath = dirInfo.Directory?.FullName ?? string.Empty;
+            if(string.IsNullOrWhiteSpace(diretoryPath)) return;
+
+            _logger.LogInformation("Processing files in {0}", diretoryPath);
             var archiveInvoker = new ArchiveInvoker();
             archiveInvoker.SetCommand(new ArchiveBuildSourceCommand(
                 new BuildArchiveSourceRequest{
                     LogFileType = dirInfo.ArchiveLogFileType,
-                    DirectoryFullPath = dirInfo.Directory.FullName
+                    DirectoryFullPath = diretoryPath
                 }, 
                 _archiveActions));
             archiveInvoker.ExecuteCommand();
@@ -137,7 +139,7 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
             
             totalFilesArchived += _archiveActions.ArchiveSource.Files.Count;
             totalBytesArchived += _archiveActions.ArchiveSource.TotalBytes;
-            Directory.SetCurrentDirectory(dirInfo.Directory.FullName);
+            Directory.SetCurrentDirectory(diretoryPath);
 
             archiveInvoker.SetCommand(new ArchiveFilesCommand(
                 new ArchiveFilesRequest{
@@ -170,7 +172,7 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
                         _logger.LogError("Skipping directory, '{0}'. It could not be found.", dirInfo.FullName);
                         continue;
                     }
-                    yield return new ArchiveDirectoryToProcess{ Directory = dirInfo, ArchiveLogFileType = cmd.LogFileType.Value};
+                    yield return new ArchiveDirectoryToProcess{ Directory = dirInfo, ArchiveLogFileType = cmd.LogFileType ?? ArchiveLogFileTypes.None};
                 }
             }
         }

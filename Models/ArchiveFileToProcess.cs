@@ -1,6 +1,6 @@
 namespace mcy.CmdTools.Models.Archive;
 
-public class ArchiveFileProperties
+public class ArchiveFileToProcess
 {
     public string FileName{get;set;} = String.Empty;
     /// <summary>

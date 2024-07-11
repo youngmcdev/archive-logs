@@ -6,6 +6,7 @@ using mcy.CmdTools.Services.Archive;
 using mcy.CmdTools.Strategies.Archive;
 using Microsoft.Extensions.Options;
 using System.Text;
+using mcy.CmdTools.Infrastructure.Archive;
 
 namespace mcy.CmdTools.Commands.Archive;
 public interface IArchiveActions
@@ -96,7 +97,7 @@ public class ArchiveActions: IArchiveActions
         }
     }
 
-    private IEnumerable<ArchiveFileProperties> VerifyFiles(FileInfo[] files, ArchiveLogFileTypeOptions logFileTypeOptions)
+    private IEnumerable<ArchiveFileToProcess> VerifyFiles(FileInfo[] files, ArchiveLogFileTypeOptions logFileTypeOptions)
     {
         var thresholdDate = DateTime.Today.AddDays(_config.NumberOfDaysToKeepFiles);
         var verifyFileRequest = new ArchiveVerifyFileRequest{

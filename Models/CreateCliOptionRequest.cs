@@ -1,5 +1,5 @@
 using System.CommandLine.Parsing;
-namespace mcy.CmdTools.Models;
+namespace mcy.CmdTools.Models.CliOptions;
 
 public class CreateCliOptionRequest<T>: BaseCreateCliOptionRequest
 {

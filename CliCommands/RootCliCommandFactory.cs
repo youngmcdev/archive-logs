@@ -1,5 +1,5 @@
 using System.CommandLine;
-using mcy.CmdTools.Models;
+using mcy.CmdTools.Models.CliCommands;
 
 namespace mcy.CmdTools.CliCommands;
 

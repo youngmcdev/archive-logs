@@ -5,7 +5,7 @@ namespace mcy.CmdTools.Strategies.Archive;
 
 public interface IArchiveVerifyFileStrategy
 {
-    abstract ArchiveFileProperties? VerifyFile(FileInfo file);
+    abstract ArchiveFileToProcess? VerifyFile(FileInfo file);
     public void SetLogger(ILogger? logger);
 }
 
@@ -24,7 +24,7 @@ public abstract class ArchiveVerifyFileStrategy: IArchiveVerifyFileStrategy
         _logger = logger;
     }
 
-    public ArchiveFileProperties? VerifyFile(FileInfo file)
+    public ArchiveFileToProcess? VerifyFile(FileInfo file)
     {
         var dateExtractedFromFileName = GetDateFromFileName(file.Name);
         if(dateExtractedFromFileName is null) return null;
@@ -46,7 +46,7 @@ public abstract class ArchiveVerifyFileStrategy: IArchiveVerifyFileStrategy
 
     protected abstract DateTime ParseToDateTime(string dateString);
 
-    private ArchiveFileProperties? CompareDates(FileInfo file, DateTime fileDate)
+    private ArchiveFileToProcess? CompareDates(FileInfo file, DateTime fileDate)
     {
         if(fileDate > _options.ThresholdForArchivingFile)
         {
@@ -60,7 +60,7 @@ public abstract class ArchiveVerifyFileStrategy: IArchiveVerifyFileStrategy
                 file.Name, fileDate.ToShortDateString(), _options.ThresholdForArchivingFile));
         }
         
-        return new ArchiveFileProperties
+        return new ArchiveFileToProcess
         {
             FileName = file.FullName,
             FileSize = file.Length
