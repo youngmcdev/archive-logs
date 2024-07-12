@@ -15,6 +15,7 @@ public interface IArchiveActions
     public void BuildArchiveSource(BuildArchiveSourceRequest request);
     public void ArchiveFiles(ArchiveFilesRequest request);
 }
+
 public class ArchiveActions: IArchiveActions
 {
     private readonly ArchiveOptions _config;
@@ -105,8 +106,7 @@ public class ArchiveActions: IArchiveActions
             ThresholdForArchivingFile = thresholdDate
         };
         
-        var strategy = GetVerifyFileStrategy(verifyFileRequest);
-        strategy.SetLogger(_logger); // This is for development only.
+        var strategy = GetVerifyFileStrategy(verifyFileRequest).SetLogger(_logger);
         var verifier = new ArchiveVerifyFileService(strategy);
         
         _logger.LogInformation("Verifying files - Threshold Date: {0}; Date Offset: {1}", thresholdDate.ToString(), _config.NumberOfDaysToKeepFiles);

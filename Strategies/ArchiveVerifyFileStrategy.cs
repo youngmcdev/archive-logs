@@ -3,12 +3,6 @@ using mcy.CmdTools.Models.Archive;
 
 namespace mcy.CmdTools.Strategies.Archive;
 
-public interface IArchiveVerifyFileStrategy
-{
-    abstract ArchiveFileToProcess? VerifyFile(FileInfo file);
-    public void SetLogger(ILogger? logger);
-}
-
 public abstract class ArchiveVerifyFileStrategy: IArchiveVerifyFileStrategy
 {
     protected ArchiveVerifyFileRequest _options;
@@ -19,9 +13,10 @@ public abstract class ArchiveVerifyFileStrategy: IArchiveVerifyFileStrategy
         _logger = logger;
     }
 
-    public void SetLogger(ILogger? logger)
+    public ArchiveVerifyFileStrategy SetLogger(ILogger? logger)
     {
         _logger = logger;
+        return this;
     }
 
     public ArchiveFileToProcess? VerifyFile(FileInfo file)

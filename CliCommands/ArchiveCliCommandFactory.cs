@@ -115,7 +115,7 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
         int totalFilesArchived = 0;
         long totalBytesArchived = 0;
         _logger.LogInformation("Begin the file archiving process - {0}", DateTime.Now.ToString("yyyy.MM.dd hh:mm:ss zzz"));
-        _logger.LogDebug("Archive Command Options: {0}", archiveCommandHandlerOptions.ToString());
+        _logger.LogInformation("Archive Command Options: {0}", archiveCommandHandlerOptions.ToString());
 
         var directories = GetDirectoriesToProcess(archiveCommandHandlerOptions);
         foreach(var currDirectory in directories) {ProcessDirectory(currDirectory);}
