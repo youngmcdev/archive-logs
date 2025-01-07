@@ -2,9 +2,11 @@ using mcy.CmdTools.Models.Archive;
 
 namespace mcy.CmdTools.Strategies.Archive;
 
-public class ArchiveVerifyFileStrategy_yyyyMM: ArchiveVerifyFileStrategy
+public interface IArchiveVerifyFileStrategy_yyyyMM : IArchiveVerifyFileStrategy { }
+
+public class ArchiveVerifyFileStrategy_yyyyMM: ArchiveVerifyFileStrategy, IArchiveVerifyFileStrategy_yyyyMM
 {
-    public ArchiveVerifyFileStrategy_yyyyMM(ArchiveVerifyFileRequest request, ILogger? logger = null):base(request, logger){}
+    public ArchiveVerifyFileStrategy_yyyyMM(ILogger<ArchiveVerifyFileStrategy_yyyyMMdd> logger) : base(logger) { }
 
     protected override DateTime ParseToDateTime(string dateString)
     {

@@ -57,6 +57,7 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
         var directoriesFromConfigurationFile = _boolOptionFactory.CreateOption(new CreateBoolCliOptionRequest
         {
             Name = "--directories-from-config",
+            Alias = "-dc",
             Description = "If true, then --directories is ignored. Multiple sets of directories and their respective --log-file-type values may be specified in appsettings.json. This is a way to queue multiple runs of the archive command. Defaults to false."
         });
 
@@ -65,7 +66,6 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
             Name = "--directories",
             Alias = "-d",
             Description = "A list of directories to search for log files. An archive file will be left in each directory where log files are found.",
-            IsRequired = true,
             IsDefault = true,
             AllowMultipleArgumentsPerToken = true,
             ParseArgumentDelegate = ParseDirectoriesDelegate
@@ -84,8 +84,7 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
         {
             Name = "--log-file-type",
             Alias = "-t",
-            Description = "The type of log file that will be looked for in the directories specified. Other file will be ignored. A file type uses a regular expression to compare to file names and expects the date to be in the file name at a specific, relative location in the file name.",
-            IsRequired = true
+            Description = "The type of log file that will be looked for in the directories specified. Other file will be ignored. A file type uses a regular expression to compare to file names and expects the date to be in the file name at a specific, relative location in the file name."
         });
 
         _command = new Command("archive", "Archive log files and optionally delete the original files.")
@@ -107,17 +106,19 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
         return _command;
     }
 
-    // TODO: Need a way to queue multiple runs of the archive command from appsettings.json.
-
     // TODO: Possibly move these delegates to services that are injected.
     private void CommandHandlerDelegate(ArchiveCliCommandHandlerOptions archiveCommandHandlerOptions)
     {
-        int totalFilesArchived = 0;
+        int totalFilesArchived = 0,
+            directoryCount = 0;
         long totalBytesArchived = 0;
-        _logger.LogInformation("Begin the file archiving process - {0}", DateTime.Now.ToString("yyyy.MM.dd hh:mm:ss zzz"));
-        _logger.LogInformation("Archive Command Options: {0}", archiveCommandHandlerOptions.ToString());
+        _logger.LogInformation("Begin the file archiving process. Archive Command Options: {0}", archiveCommandHandlerOptions.ToString());
 
-        var directories = GetDirectoriesToProcess(archiveCommandHandlerOptions);
+        var directories = GetDirectoriesToProcess(archiveCommandHandlerOptions).ToList();
+        _logger.LogInformation("List of {0} directories {1}.", 
+            directories.Count, 
+            archiveCommandHandlerOptions.IsDirectoriesFromConfigurationFile ? "obtained from the appsettings.json file" : "provided on the command line");
+        
         foreach(var currDirectory in directories) {ProcessDirectory(currDirectory);}
 
         void ProcessDirectory(ArchiveDirectoryToProcess dirInfo)
@@ -125,7 +126,7 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
             var diretoryPath = dirInfo.Directory?.FullName ?? string.Empty;
             if(string.IsNullOrWhiteSpace(diretoryPath)) return;
 
-            _logger.LogInformation("Processing files in {0}", diretoryPath);
+            _logger.LogInformation("Directory #{0}, '{1}'. Processing relevant, {2}, files.", ++directoryCount, diretoryPath, dirInfo.ArchiveLogFileType);
             var archiveInvoker = new ArchiveInvoker();
             archiveInvoker.SetCommand(new ArchiveBuildSourceCommand(
                 new BuildArchiveSourceRequest{
@@ -150,8 +151,7 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
                 _archiveActions));
             archiveInvoker.ExecuteCommand();
         }
-        _logger.LogInformation("The file archiving process is complete - {0}{1}    Number of files archived: {2} ({3}MB)", 
-            DateTime.Now.ToString("yyyy.MM.dd hh:mm:ss zzz"),
+        _logger.LogInformation("THE FILE ARCHIVING PROCESS IS COMPLETE - {0}    Number of files archived: {1} ({2}MB)", 
             Environment.NewLine,
             totalFilesArchived,
             Math.Round((double)totalBytesArchived / (1024*1024), 2));
@@ -182,6 +182,11 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
         }
     }
 
+    /// <summary>
+    /// Validate the path to the 7zip program.
+    /// </summary>
+    /// <param name="result"></param>
+    /// <returns></returns>
     private FileInfo ParsePathToZipDelegate(ArgumentResult result)
     {
         var filePath = String.Empty;
@@ -203,21 +208,34 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
         return new FileInfo(filePath);
     }
 
-    private IEnumerable<DirectoryInfo> ParseDirectoriesDelegate(ArgumentResult result)
+    /// <summary>
+    /// Validate the directories specified on the commandline.
+    /// </summary>
+    /// <param name="listOfDirectoriesFromCommandline"></param>
+    /// <returns></returns>
+    private IEnumerable<DirectoryInfo> ParseDirectoriesDelegate(ArgumentResult listOfDirectoriesFromCommandline)
     {
         var filteredDirectories = new List<DirectoryInfo>();
-        foreach (var t in result.Tokens)
+        foreach (var directoryName in listOfDirectoriesFromCommandline.Tokens)
         {
-            var filePath = t.Value;
-            var exists = Directory.Exists(filePath);
-
+            var directoryPath = directoryName.Value;
+            var exists = Directory.Exists(directoryPath);
+            _logger.LogInformation("  #ParentSymbolName:{0}; SymbolName:{1}", 
+                listOfDirectoriesFromCommandline.Parent.Symbol.Name,
+                listOfDirectoriesFromCommandline.Symbol.Name
+                //listOfDirectoriesFromCommandline.Parent.Symbol.Parents.FirstOrDefault().GetCompletions().FirstOrDefault().Label
+                );
+                foreach(var c in listOfDirectoriesFromCommandline.Parent.Symbol.Parents.FirstOrDefault().GetCompletions())
+                {
+                    _logger.LogInformation("    Completions For {0}: Kind={1}; Label={2}; InsertText={3}; SortText={4}; Documentation={5}; Detail={6}; ToString={7}", listOfDirectoriesFromCommandline.Parent.Symbol.Parents.FirstOrDefault().Name, c.Kind, c.Label, c.InsertText, c.SortText, c.Documentation, c.Detail, c.ToString());
+                }
             if (exists)
             {
-                filteredDirectories.Add(new DirectoryInfo(filePath));
+                filteredDirectories.Add(new DirectoryInfo(directoryPath));
             }
             else
             {
-                result.ErrorMessage = $"Directory, {filePath}, could not be found. Please ensure the directories to be processed exist.";
+                listOfDirectoriesFromCommandline.ErrorMessage = $"Directory, {directoryPath}, could not be found. Please ensure the directories to be processed exist.";
             }
         }
         

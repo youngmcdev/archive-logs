@@ -5,6 +5,7 @@ using mcy.CmdTools.Services;
 using mcy.CmdTools.Commands.Archive;
 using mcy.CmdTools.Infrastructure.Archive;
 using Serilog;
+using mcy.CmdTools.Strategies.Archive;
 
 namespace mcy.CmdTools;
 
@@ -25,7 +26,7 @@ public class Program
 
         try
         {
-            Log.Information("Starting the application...");
+            Log.Information("**********    STARTING THE APPLICATION    **********", Environment.NewLine);
             var builder = Host.CreateApplicationBuilder(args);
             builder.Services.Configure<ArchiveOptions>(builder.Configuration.GetSection(ArchiveOptions.Archive));
             builder.Services.AddHostedService<Worker>()
@@ -41,7 +42,11 @@ public class Program
                 .AddScoped<ICliOptionFactory<FileInfo>, CliOptionFactory<FileInfo>>()
                 .AddScoped<ICliOptionFactory<IEnumerable<DirectoryInfo>>, CliOptionFactory<IEnumerable<DirectoryInfo>>>()
                 .AddScoped<ICliOptionFactory<ArchiveLogFileTypes>, CliOptionFactory<ArchiveLogFileTypes>>()
-                .AddScoped<ICommandExecutor, CommandExecutor>();
+                .AddScoped<ICommandExecutor, CommandExecutor>()
+                .AddScoped<IArchiveVerifyFileStrategy_yyMMdd, ArchiveVerifyFileStrategy_yyMMdd>()
+                .AddScoped<IArchiveVerifyFileStrategy_yyyyMM, ArchiveVerifyFileStrategy_yyyyMM>()
+                .AddScoped<IArchiveVerifyFileStrategy_yyyyMMdd, ArchiveVerifyFileStrategy_yyyyMMdd>()
+                .AddScoped<IArchiveVerifyFileStrategy_yyyy_MM_dd, ArchiveVerifyFileStrategy_yyyy_MM_dd>();
 
             
             var host = builder.Build();

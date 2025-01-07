@@ -19,7 +19,6 @@ public class ArchiveCliCommandHandlerOptions
     IsDirectoriesFromConfigurationFile: {IsDirectoriesFromConfigurationFile}
     ArchiveLogFileTypes: {ArchiveLogFileType}
     PathTo7Zip: {PathTo7Zip?.FullName ?? "Not Specified"}
-    Directories: {string.Join(", ", Directories?.Select(d => d.FullName) ?? Array.Empty<string>()) }
-";
+    Directories: {string.Join(", ", Directories?.Select(d => d.FullName) ?? Array.Empty<string>()) }";
     }
 }

@@ -178,6 +178,8 @@ DocProject/Help/html
 
 # Click-Once directory
 publish/
+mcyp/
+log[0-9]*.txt
 
 # Publish Web Output
 *.[Pp]ublish.xml
