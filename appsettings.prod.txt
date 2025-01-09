@@ -1,0 +1,129 @@
+{
+    /* "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Warning"
+    },
+    "Console": {
+      "Default": "Warning",
+      "Microsoft": "Error",
+      "mcy.CmdTools.*": "Information"
+    }
+  }, */
+  "Serilog":{
+    "Using": ["Serilog.Expressions", "Serilog.Sinks.Console", "Serilog.Sinks.File"],
+    "MinimumLevel": {
+      "Default": "Information",
+      "Override": {
+        "Microsoft": "Warning",
+        "System": "Warning",
+        "mcy.CmdTools.*": "Information"
+      }
+    },
+    "Enrich":["FromLogContext"],
+    "WriteTo":[
+      {"Name": "Console"},
+      {"Name": "File", "Args": {"path": "log.txt", "rollingInterval": "Day", "rollOnFileSizeLimit": true}}
+    ]
+  },
+  "Archive":{
+    "ArchiveLogFileTypes": [
+      {
+        "LogFileType": "IIS",
+        "FileNamePattern": "(u_ex)([0-9]{6})\\.(log)", // u_ex240715.log
+        "DatePosition": 2
+      },
+      {
+        "LogFileType": "ApiMoneyDesktop",
+        "FileNamePattern": "(moneydesktop\\.log\\.)(20[0-9-]{8})(\\.[0-9]+)?", // moneydesktop.log.2024-07-15.90210
+        "DatePosition": 2
+      },
+
+      {
+        "LogFileType": "SplashPageManager",
+        "FileNamePattern": "(splash[0-9_]+\\.log)(20[0-9]{4})", // splash_1138.log202407
+        "DatePosition": 2
+      },
+      {
+        "LogFileType": "PibItsMe",
+        "FileNamePattern": "(pib[0-9_]+\\.log)(20[0-9]{4})", // pib_5309.log202407
+        "DatePosition": 2
+      },
+      {
+        "LogFileType": "GoItsMe",
+        "FileNamePattern": "(goservice[0-9_]+ - CU0Base [0-9_]+\\.log)(20[0-9]{4})", // goservice_1_2 - CU0Base 2112.log202407
+        "DatePosition": 2
+      },
+      
+      {
+        "LogFileType": "SmsItsMe",
+        "FileNamePattern": "(TextBanking[0-9_]+\\.log\\.)(20[0-9]{6})\\.(log)", // TextBanking5309.log.20240715.log
+        "DatePosition": 2
+      },
+      {
+        "LogFileType": "PibBizLink",
+        "FileNamePattern": "(pib_mlo\\.log\\.)(20[0-9]{6})\\.(log)", // pib_mlo.log.20240715.log
+        "DatePosition": 2
+      },
+      {
+        "LogFileType": "ApiPlatformSettings",
+        "FileNamePattern": "(platformsettingsApi\\.log\\.)(20[0-9]{6})(\\.log)", // platformsettingsApi.log.20240715.log
+        "DatePosition": 2
+      },
+      {
+        "LogFileType": "ApiVersions",
+        "FileNamePattern": "(verisonsApi\\.log\\.)(20[0-9]{6})(\\.log)", // verisonsApi.log.20240715.log
+        "DatePosition": 2
+      }
+    ],
+    "PathTo7zip": "D:\\programs\\7zip\\7z.exe",
+    "NumberOfDaysToKeepFiles": -14, // How many days of logs should remain unarchived?
+    "ArchiveFileNameMonthOffset": 0, // Used in naming the archive file. Zero means use the current month. -1 will use the previous month. etc...
+    "ArchiveCommandsToInvoke":[
+      {
+        "LogFileType": "IIS",
+        "Directories": ["D:\\logs\\W3SVC2000", "D:\\logs\\W3SVC2050", "D:\\logs\\W3SVC1200", "D:\\logs\\W3SVC1130", "D:\\logs\\W3SVC1120",  
+                        "D:\\logs\\W3SVC1110", "D:\\logs\\W3SVC1100", "D:\\logs\\W3SVC1090", "D:\\logs\\W3SVC1070", "D:\\logs\\W3SVC1060", 
+                        "D:\\logs\\W3SVC1050", "D:\\logs\\W3SVC1055", "D:\\logs\\W3SVC1040", "D:\\logs\\W3SVC1020", "D:\\logs\\W3SVC1010", 
+                        "D:\\logs\\W3SVC6", "D:\\logs\\W3SVC5", "D:\\logs\\W3SVC4", "D:\\logs\\W3SVC3", "D:\\logs\\W3SVC2", "D:\\logs\\W3SVC1"]
+      },
+      {
+        "LogFileType": "IIS", // This is a test and should not find any log files.
+        "Directories": ["C:\\temp", "D:\\Serilog"]
+      },
+      {
+        "LogFileType": "SmsItsMe",
+        "Directories": ["D:\\logs\\sms.itsme247.com"]
+      },
+      {
+        "LogFileType": "ApiMoneyDesktop",
+        "Directories": ["D:\\logs\\api.itsme247.com\\moneydesktop"]
+      },
+      {
+        "LogFileType": "ApiVersions",
+        "Directories": ["D:\\logs\\api.itsme247.com\\verisons"] // "versions" is misspelled on the web server.
+      },
+      {
+        "LogFileType": "ApiPlatformSettings",
+        "Directories": ["D:\\logs\\api.itsme247.com\\platformsettings"]
+      },
+      {
+        "LogFileType": "PibItsMe",
+        "Directories": ["D:\\logs\\pib.itsme247.com"]
+      },
+      {
+        "LogFileType": "GoItsMe",
+        "Directories": ["D:\\logs\\go.itsme247.com"]
+      },
+      {
+        "LogFileType": "SplashPageManager",
+        "Directories": ["D:\\logs\\itsme247.com", "D:\\logs\\beta.itsme247.com"]
+      },
+      {
+        "LogFileType": "PibBizLink",
+        "Directories":["D:\\logs\\pib.itsmybiz247.com"]
+      }
+    ]
+  }
+}

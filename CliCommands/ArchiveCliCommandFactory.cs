@@ -227,7 +227,7 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
                 );
                 foreach(var c in listOfDirectoriesFromCommandline.Parent.Symbol.Parents.FirstOrDefault().GetCompletions())
                 {
-                    _logger.LogInformation("    Completions For {0}: Kind={1}; Label={2}; InsertText={3}; SortText={4}; Documentation={5}; Detail={6}; ToString={7}", listOfDirectoriesFromCommandline.Parent.Symbol.Parents.FirstOrDefault().Name, c.Kind, c.Label, c.InsertText, c.SortText, c.Documentation, c.Detail, c.ToString());
+                    //_logger.LogInformation("    Completions For {0}: Kind={1}; Label={2}; InsertText={3}; SortText={4}; Documentation={5}; Detail={6}; ToString={7}", listOfDirectoriesFromCommandline.Parent.Symbol.Parents.FirstOrDefault().Name, c.Kind, c.Label, c.InsertText, c.SortText, c.Documentation, c.Detail, c.ToString());
                 }
             if (exists)
             {

@@ -57,6 +57,9 @@ public class ArchiveActions: IArchiveActions
             ArchiveSource.Files.Count,
             directory.FullName,
             Math.Round((double)ArchiveSource.TotalBytes / (1024*1024), 2));
+
+        if (ArchiveSource.Files.Count < 1)
+            _logger.LogInformation("    NOTHING TO ARCHIVE{0}", Environment.NewLine);
     }
 
     public void ArchiveFiles(ArchiveFilesRequest request)
