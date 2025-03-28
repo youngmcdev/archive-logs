@@ -1,5 +1,7 @@
 # Patterns used in this project
 
+This application makes use of the Template, Strategy, Factory, and Command _Design Patterns_.
+
 ## Factory
 
 Used for instantiating an object that is an implementation of an abstract type or interface. Allows the object type to be chosen conditionally.

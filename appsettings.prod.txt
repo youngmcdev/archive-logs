@@ -77,33 +77,52 @@
         "DatePosition": 2
       }
     ],
-    "PathTo7zip": "C:\\usr\\bin\\7zip\\7z.exe",
+    "PathTo7zip": "D:\\programs\\7zip\\7z.exe",
     "NumberOfDaysToKeepFiles": -14, // How many days of logs should remain unarchived?
     "ArchiveFileNameMonthOffset": 0, // Used in naming the archive file. Zero means use the current month. -1 will use the previous month. etc...
     "ArchiveCommandsToInvoke":[
       {
         "LogFileType": "IIS",
-        "Directories": ["C:\\Logs\\testing\\w3svc2000", "C:\\Logs\\testing\\w3svc2001"]
+        "Directories": ["D:\\logs\\W3SVC2000", "D:\\logs\\W3SVC2050", "D:\\logs\\W3SVC1200", "D:\\logs\\W3SVC1130", "D:\\logs\\W3SVC1120",  
+                        "D:\\logs\\W3SVC1110", "D:\\logs\\W3SVC1100", "D:\\logs\\W3SVC1090", "D:\\logs\\W3SVC1070", "D:\\logs\\W3SVC1060", 
+                        "D:\\logs\\W3SVC1050", "D:\\logs\\W3SVC1055", "D:\\logs\\W3SVC1040", "D:\\logs\\W3SVC1020", "D:\\logs\\W3SVC1010", 
+                        "D:\\logs\\W3SVC6", "D:\\logs\\W3SVC5", "D:\\logs\\W3SVC4", "D:\\logs\\W3SVC3", "D:\\logs\\W3SVC2", "D:\\logs\\W3SVC1"]
       },
       {
-        "LogFileType": "IIS",
-        "Directories": ["C:\\temp"]
+        "LogFileType": "IIS", // This is a test and should not find any log files.
+        "Directories": ["C:\\temp", "D:\\Serilog"]
       },
       {
         "LogFileType": "SmsItsMe",
-        "Directories": ["C:\\Logs\\testing\\sms.itsme247.com"]
-      },
-      {
-        "LogFileType": "MarkYoung",
-        "Directories": ["C:\\Logs\\testing\\sms.itsme247.com"]
+        "Directories": ["D:\\logs\\sms.itsme247.com"]
       },
       {
         "LogFileType": "ApiMoneyDesktop",
-        "Directories": ["C:\\Logs\\testing\\moneydesktop"]
+        "Directories": ["D:\\logs\\api.itsme247.com\\moneydesktop"]
+      },
+      {
+        "LogFileType": "ApiVersions",
+        "Directories": ["D:\\logs\\api.itsme247.com\\verisons"] // "versions" is misspelled on the web server.
+      },
+      {
+        "LogFileType": "ApiPlatformSettings",
+        "Directories": ["D:\\logs\\api.itsme247.com\\platformsettings"]
       },
       {
         "LogFileType": "PibItsMe",
-        "Directories": ["C:\\Logs\\testing\\pib.itsme247.com"]
+        "Directories": ["D:\\logs\\pib.itsme247.com"]
+      },
+      {
+        "LogFileType": "GoItsMe",
+        "Directories": ["D:\\logs\\go.itsme247.com"]
+      },
+      {
+        "LogFileType": "SplashPageManager",
+        "Directories": ["D:\\logs\\itsme247.com", "D:\\logs\\beta.itsme247.com"]
+      },
+      {
+        "LogFileType": "PibBizLink",
+        "Directories":["D:\\logs\\pib.itsmybiz247.com"]
       }
     ]
   }

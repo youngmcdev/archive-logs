@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using mcy.CmdTools.Commands.Archive;
 using mcy.CmdTools.Models.Archive;
 
 namespace mcy.CmdTools.Strategies.Archive;
@@ -6,16 +7,15 @@ namespace mcy.CmdTools.Strategies.Archive;
 public abstract class ArchiveVerifyFileStrategy: IArchiveVerifyFileStrategy
 {
     protected ArchiveVerifyFileRequest _options;
-    protected ILogger? _logger;
-    public ArchiveVerifyFileStrategy(ArchiveVerifyFileRequest request, ILogger? logger = null)
+    protected ILogger<ArchiveVerifyFileStrategy>? _logger;
+    public ArchiveVerifyFileStrategy(ILogger<ArchiveVerifyFileStrategy> logger)
     {
-        _options = request;
         _logger = logger;
     }
 
-    public ArchiveVerifyFileStrategy SetLogger(ILogger? logger)
+    public IArchiveVerifyFileStrategy SetStrategyOptions( ArchiveVerifyFileRequest options)
     {
-        _logger = logger;
+        _options = options;
         return this;
     }
 
@@ -43,15 +43,16 @@ public abstract class ArchiveVerifyFileStrategy: IArchiveVerifyFileStrategy
 
     private ArchiveFileToProcess? CompareDates(FileInfo file, DateTime fileDate)
     {
+
         if(fileDate > _options.ThresholdForArchivingFile)
         {
-            Log(string.Format("{0}: The file date, {1}, is greater than {2}. This file will NOT be archived.", 
+            Log(string.Format("    {0}: The file date, {1}, is greater than {2}. This file will NOT be archived.", 
                 file.Name, fileDate.ToShortDateString(), _options.ThresholdForArchivingFile));
             return null;
         }
         else
         {
-            Log(string.Format("{0}: The file date, {1}, is less than or equal to {2}. This file will be archived.", 
+            Log(string.Format("    {0}: The file date, {1}, is less than or equal to {2}. This file will be archived.", 
                 file.Name, fileDate.ToShortDateString(), _options.ThresholdForArchivingFile));
         }
         

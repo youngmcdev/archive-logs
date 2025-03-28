@@ -17,7 +17,7 @@ public class Worker : BackgroundService
     {
         var args = Environment.GetCommandLineArgs().Skip(1).ToArray();
         var response = _commandExecutor.Run(args);
-        _logger.LogInformation("    ** Command response: {0} **", response);
+        _logger.LogInformation("    ** Final command response: {0} **{1}", response, System.Environment.NewLine + System.Environment.NewLine);
         _host.StopAsync();
     }
 }

@@ -5,5 +5,5 @@ namespace mcy.CmdTools.Strategies.Archive;
 public interface IArchiveVerifyFileStrategy
 {
     abstract ArchiveFileToProcess? VerifyFile(FileInfo file);
-    public ArchiveVerifyFileStrategy SetLogger(ILogger? logger);
+    IArchiveVerifyFileStrategy SetStrategyOptions(ArchiveVerifyFileRequest options);
 }
