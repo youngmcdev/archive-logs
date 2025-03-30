@@ -1,8 +1,13 @@
 namespace mcy.CmdTools.Infrastructure;
 
-public static class Utility
+public interface IUtility
 {
-    public static string ReverseString(string value)
+    string ReverseString(string value);
+}
+
+public class Utility : IUtility
+{
+    public string ReverseString(string value)
     {
         char[] charArray = value.ToCharArray();
         Array.Reverse(charArray);
