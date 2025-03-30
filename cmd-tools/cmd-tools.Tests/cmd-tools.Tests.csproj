@@ -22,7 +22,6 @@
 
   <ItemGroup>
     <Folder Include="CliCommands\" />
-    <Folder Include="CliOptions\" />
     <Folder Include="Commands\" />
     <Folder Include="Services\" />
     <Folder Include="Strategies\" />
