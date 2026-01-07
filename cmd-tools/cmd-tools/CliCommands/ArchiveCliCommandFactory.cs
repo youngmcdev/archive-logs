@@ -84,7 +84,7 @@ public class ArchiveCliCommandFactory : CliCommandFactory, IArchiveCliCommandFac
         {
             Name = "--log-file-type",
             Alias = "-t",
-            Description = "The type of log file that will be looked for in the directories specified. Other file will be ignored. A file type uses a regular expression to compare to file names and expects the date to be in the file name at a specific, relative location in the file name."
+            Description = "The type of log file that will be looked for in the directories specified. Other files will be ignored. A file type uses a regular expression to compare to file names and expects the date to be in the file name at a specific, relative location in the file name."
         });
 
         _command = new Command("archive", "Archive log files and optionally delete the original files.")

@@ -26,7 +26,7 @@ public class Program
 
         try
         {
-            Log.Information("**********    STARTING THE APPLICATION    **********", Environment.NewLine);
+            //Log.Information("**********    STARTING THE APPLICATION    **********", Environment.NewLine);
             var builder = Host.CreateApplicationBuilder(args);
             builder.Services.Configure<ArchiveOptions>(builder.Configuration.GetSection(ArchiveOptions.Archive));
             builder.Services.AddHostedService<Worker>()

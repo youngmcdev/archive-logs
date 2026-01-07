@@ -1,8 +1,12 @@
 Param(
-    [string]$publishTarget = "C:\usr\bin\cmd-tools" # Specify another directory on the commandline. Ex: .\publish-it -publishTarget:C:\temp\cmd-tools
+    [string]$publishTarget = "C:\usr\bin\cmd-tools" # Directory where the executable, cmd-tools.exe, will be 
+                                                    # published. Defaults to "C:\usr\bin\cmd-tools".
+                                                    # Specify another directory on the commandline. 
+                                                    # Ex: .\run-it.ps1 -publishTarget:"C:\Program Files\cmd-tools"
 )
 $ErrorActionPreference = "Stop"
 
+# Either create or empty the target directory.
 if( test-path $publishTarget -PathType Container) {
     get-childitem -path $publishTarget -include *.* -file -recurse | foreach-object { $_.Delete() } 
 } else {
